@@ -32,13 +32,16 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Actualizar código de producción
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+      - name: Descargar código para desplegar
+        uses: actions/checkout@v4
+
+      - name: Copiar código a producción
         run: |
-          git -C /Users/darce/Documents/ChatGPT/AI-Mastery-hub \
-            -c http.extraheader="AUTHORIZATION: bearer $GITHUB_TOKEN" \
-            pull --ff-only origin main
+          rsync -a \
+            --exclude='.git/' \
+            "$GITHUB_WORKSPACE/" \
+            /Users/darce/Documents/ChatGPT/AI-Mastery-hub/
 
 
       - name: Reconstruir y arrancar la aplicación
