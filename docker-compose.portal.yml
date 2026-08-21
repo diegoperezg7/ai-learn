@@ -4,7 +4,9 @@
 # los alcance por nombre y AIdentity inyecte las cabeceras X-Auth-*.
 services:
   hub-api:
-    networks: [hub, auth-proxy_default, supabase_default]
+    # edge-db-hub le da supabase-db sin entrar en `supabase_default`,
+    # donde estaban los backends de las demás apps.
+    networks: [hub, edge-hub, edge-db-hub]
     environment:
       DATABASE_URL: postgresql+psycopg://postgres:${POSTGRES_PASSWORD}@supabase-db:5432/postgres
       DATABASE_SCHEMA: ai_learn
@@ -14,10 +16,10 @@ services:
       OLLAMA_MODEL: gemma4:e2b
 
   hub-web:
-    networks: [hub, auth-proxy_default]
+    networks: [hub, edge-hub]
 
 networks:
-  auth-proxy_default:
+  edge-hub:
     external: true
-  supabase_default:
+  edge-db-hub:
     external: true
