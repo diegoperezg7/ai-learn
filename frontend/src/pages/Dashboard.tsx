@@ -97,7 +97,7 @@ export function Dashboard() {
                   <div>
                     <strong>¿Quieres hacer algo más?</strong>
                     <div className="small dim" style={{ marginTop: 3 }}>
-                      El objetivo de hoy está cumplido. Puedes parar aquí o adelantar una sesión opcional.
+                      El objetivo de hoy está cumplido. Puedes parar aquí o revisar la próxima lección y decidir si hacerla completa o dividirla en bloques.
                     </div>
                     {nextOptional && (
                       <div className="small" style={{ marginTop: 7 }}>
@@ -107,9 +107,8 @@ export function Dashboard() {
                   </div>
                   <div className="row wrap" style={{ gap: 6, flexShrink: 0 }}>
                     <Link to="/roadmap" className="btn btn-sm btn-primary">
-                      {nextOptional ? 'Adelantar sesión' : 'Explorar roadmap'} <ArrowRight size={13} />
+                      {nextOptional ? 'Revisar próxima lección' : 'Explorar roadmap'} <ArrowRight size={13} />
                     </Link>
-                    <Link to="/interview" className="btn btn-sm">Repasar entrevista</Link>
                   </div>
                 </div>
               </>
