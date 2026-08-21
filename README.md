@@ -294,7 +294,15 @@ en Cloudflare Zero Trust, **es manual**.
 
 ## Configuración
 
-Todo por variables de entorno, ver `.env.example`:
+Todo por variables de entorno, ver `.env.example`. Los valores de produccion viven ademas
+en el repo: los ocho de abajo como **repository variables** y `OLLAMA_URL` como **secret**,
+porque es el unico que nombra infraestructura.
+
+```bash
+gh variable list --repo diegoperezg7/ai-mastery-hub
+gh secret list   --repo diegoperezg7/ai-mastery-hub
+```
+
 
 | Variable | Por defecto | Para qué |
 |---|---|---|
