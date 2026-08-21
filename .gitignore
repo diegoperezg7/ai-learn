@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.venv/
+__pycache__/
+*.pyc
+backend/data/
+.env
+*.log
+.DS_Store
+
+# El CV real no va al repo: la app lo importa en el primer arranque
+backend/import/cv.md
+*.tsbuildinfo

@@ -1,0 +1,16 @@
+# Uso en el Mac Mini:
+#   docker compose -f docker-compose.yml -f docker-compose.portal.yml up -d --build
+# Conecta ambos contenedores a la red del auth-proxy de darc3 para que Caddy
+# los alcance por nombre y AIdentity inyecte las cabeceras X-Auth-*.
+services:
+  hub-api:
+    networks: [hub, auth-proxy_default]
+    environment:
+      REQUIRE_PORTAL_AUTH: "true"
+
+  hub-web:
+    networks: [hub, auth-proxy_default]
+
+networks:
+  auth-proxy_default:
+    external: true

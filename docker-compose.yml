@@ -1,0 +1,42 @@
+services:
+  hub-api:
+    build: ./backend
+    container_name: hub-api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: sqlite:////app/data/hub.db
+      REQUIRE_PORTAL_AUTH: "${REQUIRE_PORTAL_AUTH:-false}"
+      SPRINT_START: "${SPRINT_START:-2026-08-21}"
+      CORE_DEADLINE: "${CORE_DEADLINE:-2026-11-29}"
+      FINAL_DEADLINE: "${FINAL_DEADLINE:-2026-12-31}"
+      WEEKLY_TARGET_HOURS: "${WEEKLY_TARGET_HOURS:-6}"
+      COACH_ENABLED: "${COACH_ENABLED:-true}"
+      OLLAMA_URL: "${OLLAMA_URL:-http://host.docker.internal:11434}"
+      OLLAMA_MODEL: "${OLLAMA_MODEL:-qwen2.5:7b}"
+      TZ: Europe/Madrid
+    volumes:
+      - hub-data:/app/data
+      # Drop a cv.md here to seed the resume on first boot (read-only).
+      - ./backend/import:/app/import:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks: [hub]
+
+  hub-web:
+    build: ./frontend
+    container_name: hub-web
+    restart: unless-stopped
+    depends_on:
+      - hub-api
+    ports:
+      - "${WEB_PORT:-5183}:80"
+    environment:
+      TZ: Europe/Madrid
+    networks: [hub]
+
+volumes:
+  hub-data:
+
+networks:
+  hub:
+    driver: bridge
