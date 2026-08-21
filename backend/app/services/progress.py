@@ -11,9 +11,47 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from ..config import settings
-from ..models import InterviewQuestion, Skill, StudySession, Task, WeeklyReview
+from ..models import DayPlan, InterviewQuestion, Skill, StudySession, Task, WeeklyReview
 
 DONE_STATUSES = {"Completed", "Interview Ready"}
+
+
+def rollover_overdue_plans(db: Session, ref: date | None = None) -> int:
+    """Carry unfinished study sessions from past dates into today's queue.
+
+    The move happens only when a new day is opened, so unfinished work is never
+    duplicated and today's sessions are not moved away on every refresh.
+    """
+    ref = ref or today()
+    overdue = db.scalars(
+        select(DayPlan)
+        .where(DayPlan.day < ref, DayPlan.done.is_(False))
+        .order_by(DayPlan.day, DayPlan.slot, DayPlan.id)
+    ).all()
+    if not overdue:
+        return 0
+
+    current_review = current_review_for_rollover(db, ref)
+    next_slot = db.scalar(
+        select(func.max(DayPlan.slot)).where(DayPlan.day == ref)
+    )
+    next_slot = (next_slot if next_slot is not None else -1) + 1
+    for plan in overdue:
+        plan.day = ref
+        plan.slot = next_slot
+        if current_review and current_review.week_number is not None:
+            plan.week = current_review.week_number
+        next_slot += 1
+    db.commit()
+    return len(overdue)
+
+
+def current_review_for_rollover(db: Session, ref: date) -> WeeklyReview | None:
+    reviews = db.scalars(select(WeeklyReview).order_by(WeeklyReview.id)).all()
+    for review in reviews:
+        if review.start_date and review.end_date and review.start_date <= ref <= review.end_date:
+            return review
+    return None
 
 
 def today() -> date:

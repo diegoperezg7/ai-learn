@@ -225,6 +225,7 @@ def mark_all_read(db: Session = Depends(get_db)) -> None:
 @router.get("/dashboard", response_model=DashboardOut)
 def dashboard(db: Session = Depends(get_db)) -> DashboardOut:
     ref = progress.today()
+    progress.rollover_overdue_plans(db, ref)
     tasks = db.scalars(select(Task)).unique().all()
     real_tasks = [t for t in tasks if t.phase != "Break"]
 
