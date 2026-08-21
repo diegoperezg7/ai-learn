@@ -1,7 +1,4 @@
 <div align="center">
-
-# AI-Learn
-
 <img src="frontend/public/assets/ai-learn-wordmark.png" width="520" alt="AI-Learn">
 
 **El sistema operativo de mi carrera técnica como AI Engineer.**
