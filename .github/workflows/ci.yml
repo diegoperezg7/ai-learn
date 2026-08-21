@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: self-hosted
+
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+
+      - name: Comprobar frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build
+
+      - name: Comprobar Docker Compose
+        run: docker compose config
