@@ -162,6 +162,7 @@ textarea { resize: vertical; min-height: 88px; line-height: 1.6; }
 .card-head {
   display: flex; align-items: center; gap: 10px;
   margin-bottom: 14px;
+  min-width: 0;
 }
 .card-head h3 { font-size: 14px; }
 .card-head .spacer { flex: 1; }
@@ -410,7 +411,9 @@ textarea { resize: vertical; min-height: 88px; line-height: 1.6; }
   .sidebar.open { transform: none; }
   .scrim { position: fixed; inset: 0; background: rgba(2, 6, 20, 0.5); z-index: 80; }
   .mobile-only { display: inline-flex; }
-  .content { padding: 14px; }
+  .topbar { padding: 0 14px; gap: 8px; }
+  .topbar h1 { min-width: 0; flex: 1; }
+  .content { padding: 14px 12px 24px; }
   .grid-4, .grid-3, .grid-2, .grid-main, .grid-split { grid-template-columns: 1fr; }
   .tl-row { grid-template-columns: 118px 1fr; }
   .stat-value { font-size: 22px; }
@@ -422,4 +425,25 @@ textarea { resize: vertical; min-height: 88px; line-height: 1.6; }
   .tab { padding: 8px 10px; font-size: 13px; }
   .modal { max-height: 92vh; }
   .bubble { max-width: 92%; }
+  .card { padding: 14px; }
+  .card-head { flex-wrap: wrap; }
+  .card-head .spacer { display: none; }
+  .card-head > .btn { margin-left: auto; }
+  .done-next-card { flex-direction: column; align-items: stretch; }
+  .done-next-card .row { justify-content: flex-start; }
+  .tl { min-width: 620px; }
+}
+
+@media (max-width: 430px) {
+  .topbar { padding: 0 10px; }
+  .topbar .btn-icon { padding: 7px; }
+  .topbar .small { display: none; }
+  .content { padding-inline: 10px; }
+  .page-head { margin-bottom: 14px; }
+  .page-head h2 { font-size: 18px; }
+  .coach-composer { padding-left: 11px; }
+  .coach-chat { padding-inline: 0; }
+  .bubble { max-width: 96%; }
+  .done-next-card .row { flex-direction: column; align-items: stretch; }
+  .done-next-card .btn { justify-content: center; }
 }
