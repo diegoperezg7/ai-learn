@@ -122,11 +122,50 @@ erDiagram
     WEEK_REVIEW ||--o{ STUDY_SESSION : "agrega"
     CV_DOC     ||--o{ CV_SUGGESTION : "recibe"
 
-    SKILL { int id string name int current_level int target_level string completion_criteria string evidence }
-    TASK { int id string title string category int week date start date deadline string status string deliverable }
-    DAY_PLAN { int id date day int week int slot string title string scope int minutes string mode bool done }
-    STUDY_SESSION { int id date day int minutes string mode string notes }
-    INTERVIEW_Q { int id string area bool can_explain bool can_implement date next_review int interval_days }
+    SKILL {
+        int id
+        string name
+        int current_level
+        int target_level
+        string completion_criteria
+        string evidence
+    }
+    TASK {
+        int id
+        string title
+        string category
+        int week
+        date start_date
+        date deadline
+        string status
+        string deliverable
+    }
+    DAY_PLAN {
+        int id
+        date day
+        int week
+        int slot
+        string title
+        string scope
+        int minutes
+        string mode
+        bool done
+    }
+    STUDY_SESSION {
+        int id
+        date day
+        int minutes
+        string mode
+        string notes
+    }
+    INTERVIEW_Q {
+        int id
+        string area
+        bool can_explain
+        bool can_implement
+        date next_review
+        int interval_days
+    }
 ```
 
 > **Una sola fuente de verdad para las horas: `study_sessions`.** Ritmo, racha, gráficos y
