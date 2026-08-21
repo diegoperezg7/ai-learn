@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD
 
 on:
   push:
@@ -24,3 +24,19 @@ jobs:
 
       - name: Comprobar Docker Compose
         run: docker compose config
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: self-hosted
+
+    steps:
+      - name: Actualizar código de producción
+        run: |
+          git -C /Users/darce/Documents/ChatGPT/AI-Mastery-hub pull --ff-only origin main
+
+      - name: Reconstruir y arrancar la aplicación
+        working-directory: /Users/darce/Documents/ChatGPT/AI-Mastery-hub
+        run: |
+          docker compose up -d --build
+          docker compose ps
