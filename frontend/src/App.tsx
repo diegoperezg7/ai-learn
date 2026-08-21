@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import {
   BarChart3, Bell, BookOpen, Brain, CalendarDays, ClipboardList, FileText, GaugeCircle,
-  Languages, LayoutDashboard, ListChecks, Menu, Moon, Rocket, Sun, Target, X,
+  Home, Languages, LayoutDashboard, ListChecks, Menu, Moon, Rocket, Sun, Target, X,
 } from 'lucide-react'
 
 import { Badge, Card, Empty } from './components/ui'
@@ -166,6 +166,9 @@ export default function App() {
               }}>{unread}</span>
             )}
           </button>
+          <a className="btn btn-ghost btn-icon" href="https://portal.darc3.com" aria-label="Volver al portal" title="Volver al portal">
+            <Home size={17} />
+          </a>
         </header>
 
         {bellOpen && <NotificationPanel onClose={() => setBellOpen(false)} />}
