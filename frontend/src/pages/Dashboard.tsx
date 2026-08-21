@@ -47,6 +47,7 @@ export function Dashboard() {
   const weekDoneMin = weekPlan.filter((p) => p.done).reduce((a, p) => a + p.minutes, 0)
   const weekTotalMin = weekPlan.reduce((a, p) => a + p.minutes, 0)
   const allTodayDone = d.today_plan.length > 0 && todayDone === d.today_plan.length
+  const nextOptional = restOfWeek.find((p) => !p.done)
 
   const rawDay = new Date(`${d.today}T00:00:00`).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-GB', {
     weekday: 'long', day: 'numeric', month: 'long',
@@ -88,9 +89,30 @@ export function Dashboard() {
               <ProgressBar value={todayPct} tone={allTodayDone ? 'var(--success)' : undefined} />
             </div>
             {allTodayDone && (
-              <p className="small" style={{ color: 'var(--success)', marginBottom: 0, marginTop: 8 }}>
-                Hecho. {d.today_minutes_done} minutos registrados hoy.
-              </p>
+              <>
+                <p className="small" style={{ color: 'var(--success)', marginBottom: 8, marginTop: 8 }}>
+                  Hecho. {d.today_minutes_done} minutos registrados hoy.
+                </p>
+                <div className="done-next-card">
+                  <div>
+                    <strong>¿Quieres hacer algo más?</strong>
+                    <div className="small dim" style={{ marginTop: 3 }}>
+                      El objetivo de hoy está cumplido. Puedes parar aquí o adelantar una sesión opcional.
+                    </div>
+                    {nextOptional && (
+                      <div className="small" style={{ marginTop: 7 }}>
+                        Siguiente: <strong>{nextOptional.title}</strong> · {nextOptional.minutes} min
+                      </div>
+                    )}
+                  </div>
+                  <div className="row wrap" style={{ gap: 6, flexShrink: 0 }}>
+                    <Link to="/roadmap" className="btn btn-sm btn-primary">
+                      {nextOptional ? 'Adelantar sesión' : 'Explorar roadmap'} <ArrowRight size={13} />
+                    </Link>
+                    <Link to="/interview" className="btn btn-sm">Repasar entrevista</Link>
+                  </div>
+                </div>
+              </>
             )}
           </>
         )}
