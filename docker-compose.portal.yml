@@ -9,6 +9,9 @@ services:
       DATABASE_URL: postgresql+psycopg://postgres:${POSTGRES_PASSWORD}@supabase-db:5432/postgres
       DATABASE_SCHEMA: ai_learn
       REQUIRE_PORTAL_AUTH: "true"
+      COACH_ENABLED: "true"
+      OLLAMA_URL: http://host.docker.internal:11434
+      OLLAMA_MODEL: gemma4:e2b
 
   hub-web:
     networks: [hub, auth-proxy_default]
