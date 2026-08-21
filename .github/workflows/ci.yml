@@ -32,20 +32,11 @@ jobs:
     runs-on: self-hosted
 
     steps:
-  
       - name: Descargar código para desplegar
         uses: actions/checkout@v4
 
-      - name: Copiar código a producción
-        run: |
-          rsync -a \
-            --exclude='.git/' \
-            "$GITHUB_WORKSPACE/" \
-            /Users/darce/Documents/ChatGPT/AI-Mastery-hub/
-
-
       - name: Reconstruir y arrancar la aplicación
-        working-directory: /Users/darce/Documents/ChatGPT/AI-Mastery-hub
+        working-directory: ${{ github.workspace }}
         run: |
           docker compose up -d --build
           docker compose ps
