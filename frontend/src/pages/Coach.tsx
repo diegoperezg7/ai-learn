@@ -93,8 +93,8 @@ export function Coach() {
         </div>
       </Card>
 
-      <Card>
-        <div className="chat" style={{ minHeight: 320, maxHeight: '56vh', overflowY: 'auto', marginBottom: 14 }}>
+      <Card className="coach-card">
+        <div className="chat coach-chat" style={{ minHeight: 320, maxHeight: '56vh', overflowY: 'auto', marginBottom: 14 }}>
           {turns.length === 0 && (
             <Empty>
               <Bot size={26} style={{ marginBottom: 8, opacity: 0.5 }} />
@@ -109,21 +109,21 @@ export function Coach() {
           <div ref={endRef} />
         </div>
 
-        <div className="row" style={{ gap: 8, alignItems: 'flex-end' }}>
+        <div className="coach-composer">
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={t('coach.placeholder')}
             style={{ minHeight: 64 }}
             onKeyDown={(e) => {
-              if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send(input) }
+              if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(input) }
             }}
           />
-          <button className="btn btn-primary" onClick={() => send(input)} disabled={busy || !input.trim()}>
-            <Send size={15} />{t('coach.send')}
+          <button className="coach-send" onClick={() => send(input)} disabled={busy || !input.trim()} aria-label={t('coach.send')}>
+            <Send size={17} />
           </button>
         </div>
-        <p className="small dim" style={{ marginTop: 6, marginBottom: 0 }}>⌘/Ctrl + Enter para enviar</p>
+        <p className="small dim coach-hint">Enter para enviar · Shift + Enter para nueva línea</p>
       </Card>
     </>
   )
