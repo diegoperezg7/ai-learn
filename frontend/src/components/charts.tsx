@@ -1,5 +1,6 @@
 /** Recharts wrappers that follow the app's theme tokens. */
 
+import { useMemo } from 'react'
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Legend, Line, ComposedChart,
   PolarAngleAxis, PolarGrid, PolarRadiusAxis, Pie, PieChart, Radar, RadarChart,
@@ -8,23 +9,36 @@ import {
 
 import { usePrefs } from '../store/useStore'
 
-/** Recharts needs real colour values, not CSS variables. */
-export function useChartTheme() {
+/**
+ * Recharts needs resolved colour values, not `var(--accent)`, so lee los tokens
+ * del documento en vez de duplicarlos aqui. Asi la paleta vive en un solo sitio.
+ */
+const TOKENS = {
+  accent: '--accent',
+  grid: '--border',
+  axis: '--text-dim',
+  text: '--text',
+  surface: '--surface',
+  border: '--border',
+  success: '--success',
+  warning: '--warning',
+  danger: '--danger',
+  muted: '--border-strong',
+} as const
+
+type ChartTheme = { dark: boolean } & Record<keyof typeof TOKENS, string>
+
+export function useChartTheme(): ChartTheme {
   const theme = usePrefs((s) => s.theme)
-  const dark = theme === 'dark'
-  return {
-    dark,
-    accent: dark ? '#22d3ee' : '#0891b2',
-    grid: dark ? '#1e293b' : '#e2e8f0',
-    axis: dark ? '#64748b' : '#94a3b8',
-    text: dark ? '#e8eef7' : '#0f172a',
-    surface: dark ? '#0f1729' : '#ffffff',
-    border: dark ? '#1e293b' : '#e2e8f0',
-    success: dark ? '#4ade80' : '#16a34a',
-    warning: dark ? '#fbbf24' : '#d97706',
-    danger: dark ? '#f87171' : '#dc2626',
-    muted: dark ? '#334155' : '#cbd5e1',
-  }
+  return useMemo(() => {
+    const css = getComputedStyle(document.documentElement)
+    const read = (name: string) => css.getPropertyValue(name).trim()
+    const out = { dark: theme === 'dark' } as ChartTheme
+    for (const [key, token] of Object.entries(TOKENS)) {
+      out[key as keyof typeof TOKENS] = read(token)
+    }
+    return out
+  }, [theme])
 }
 
 function useTooltipStyle() {

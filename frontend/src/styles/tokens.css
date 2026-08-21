@@ -1,28 +1,29 @@
 /* Design tokens. Light is the base; dark overrides only the values. */
+/* Indigo: papel blanco de verdad y negro de verdad. El verde queda libre para el semaforo. */
 
 :root {
-  --brand-50: #ecfeff;
-  --brand-100: #cffafe;
-  --brand-300: #67e8f9;
-  --brand-400: #22d3ee;
-  --brand-500: #06b6d4;
-  --brand-600: #0891b2;
-  --brand-700: #0e7490;
+  --brand-50: #eef2ff;
+  --brand-100: #e0e7ff;
+  --brand-300: #a5b4fc;
+  --brand-400: #818cf8;
+  --brand-500: #6366f1;
+  --brand-600: #4f46e5;
+  --brand-700: #4338ca;
 
-  --bg: #f6f8fb;
-  --bg-soft: #eef2f7;
+  --bg: #ffffff;
+  --bg-soft: #f6f6fb;
   --surface: #ffffff;
-  --surface-2: #f9fafb;
-  --surface-hover: #f1f5f9;
-  --border: #e2e8f0;
-  --border-strong: #cbd5e1;
+  --surface-2: #fafaff;
+  --surface-hover: #f2f2fa;
+  --border: #e6e6f0;
+  --border-strong: #c7c8d9;
 
-  --text: #0f172a;
-  --text-soft: #475569;
-  --text-dim: #94a3b8;
+  --text: #0b0b12;
+  --text-soft: #4a4a5c;
+  --text-dim: #8b8ba1;
 
   --accent: var(--brand-600);
-  --accent-soft: rgba(6, 182, 212, 0.12);
+  --accent-soft: rgba(79, 70, 229, 0.11);
   --on-accent: #ffffff;
 
   --success: #16a34a;
@@ -37,9 +38,9 @@
   --radius-sm: 8px;
   --radius: 14px;
   --radius-lg: 20px;
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
-  --shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
-  --shadow-lg: 0 16px 48px rgba(15, 23, 42, 0.14);
+  --shadow-sm: 0 1px 2px rgba(11, 11, 18, 0.06);
+  --shadow: 0 4px 16px rgba(11, 11, 18, 0.07);
+  --shadow-lg: 0 16px 48px rgba(11, 11, 18, 0.13);
 
   --sidebar-w: 244px;
   --topbar-h: 60px;
@@ -49,21 +50,21 @@
 }
 
 :root[data-theme='dark'] {
-  --bg: #070b14;
-  --bg-soft: #0b1220;
-  --surface: #0f1729;
-  --surface-2: #131c30;
-  --surface-hover: #1a2540;
-  --border: #1e293b;
-  --border-strong: #334155;
+  --bg: #000000;
+  --bg-soft: #08080d;
+  --surface: #0d0d15;
+  --surface-2: #13131e;
+  --surface-hover: #1b1b2a;
+  --border: #23232f;
+  --border-strong: #37374d;
 
-  --text: #e8eef7;
-  --text-soft: #a3b2c7;
-  --text-dim: #64748b;
+  --text: #f2f2f7;
+  --text-soft: #a8a8bd;
+  --text-dim: #70708a;
 
-  --accent: var(--brand-400);
-  --accent-soft: rgba(34, 211, 238, 0.14);
-  --on-accent: #04222a;
+  --accent: var(--brand-300);
+  --accent-soft: rgba(165, 180, 252, 0.14);
+  --on-accent: #14142b;
 
   --success: #4ade80;
   --success-soft: rgba(74, 222, 128, 0.14);
@@ -74,7 +75,7 @@
   --info: #60a5fa;
   --info-soft: rgba(96, 165, 250, 0.14);
 
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
-  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.6);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.6);
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.65);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.8);
 }

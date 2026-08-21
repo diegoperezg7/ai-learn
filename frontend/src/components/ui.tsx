@@ -91,9 +91,13 @@ export const STATUS_TONE: Record<string, 'success' | 'warning' | 'info' | 'accen
   Dropped: '',
 }
 
+/**
+ * Escala categorica de los pilares. Deliberadamente fuera de la familia del acento
+ * (indigo): si un pilar se parece al color de marca, el donut deja de leerse.
+ */
 export const CATEGORY_COLOR: Record<string, string> = {
-  'AI Engineering': '#a855f7',
-  'Software Engineering': '#3b82f6',
+  'AI Engineering': '#ec4899',
+  'Software Engineering': '#14b8a6',
   'Cloud / Infra': '#f59e0b',
   'Models / ML': '#22c55e',
   'Meta / Review': '#94a3b8',

@@ -11,3 +11,4 @@ backend/data/
 # El CV real no va al repo: la app lo importa en el primer arranque
 backend/import/cv.md
 *.tsbuildinfo
+
