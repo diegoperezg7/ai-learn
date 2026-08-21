@@ -60,6 +60,7 @@ interface DataState {
   dismissToast: (id: number) => void
 
   completeDayPlan: (plan: DayPlan) => Promise<void>
+  startDayPlan: (plan: DayPlan) => Promise<void>
   setTaskStatus: (id: number, status: string) => Promise<void>
   toggleFocus: (task: Task) => Promise<void>
   toggleChecklist: (taskId: number, itemId: number, done: boolean) => Promise<void>
@@ -136,6 +137,13 @@ export const useData = create<DataState>()((set, get) => ({
     }
     const [dashboard, sessions, tasks] = await Promise.all([api.dashboard(), api.sessions(), api.tasks()])
     set({ dashboard, sessions, tasks })
+  },
+
+  startDayPlan: async (plan) => {
+    const updated = await api.startDay(plan.id)
+    set({ days: get().days.map((d) => (d.id === plan.id ? updated : d)) })
+    get().toast(`En curso · ${plan.title}`, 'success')
+    await get().refreshDashboard()
   },
 
   setTaskStatus: async (id, status) => {

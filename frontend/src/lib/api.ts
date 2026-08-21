@@ -101,6 +101,7 @@ export interface DayPlan {
   minutes: number
   mode: string
   done: boolean
+  started: boolean
   task_id: number | null
   resource: ResourceRef | null
 }
@@ -251,6 +252,7 @@ export const api = {
   },
   updateDay: (id: number, body: { done?: boolean; scope?: string; minutes?: number }) =>
     patch<DayPlan>(`/days/${id}`, body),
+  startDay: (id: number) => post<DayPlan>(`/days/${id}/start`),
   completeDay: (id: number, minutes?: number) =>
     post<DayPlan>(`/days/${id}/complete${minutes ? `?minutes=${minutes}` : ''}`),
 

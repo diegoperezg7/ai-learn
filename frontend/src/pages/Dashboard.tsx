@@ -17,7 +17,7 @@ const PACE_TONE: Record<string, string> = {
 export function Dashboard() {
   const t = useT()
   const lang = usePrefs((s) => s.lang)
-  const { dashboard, days } = useData()
+  const { dashboard, days, startDayPlan, completeDayPlan } = useData()
 
   const todayIso = dashboard?.today ?? ''
 
@@ -106,9 +106,20 @@ export function Dashboard() {
                     )}
                   </div>
                   <div className="row wrap" style={{ gap: 6, flexShrink: 0 }}>
-                    <Link to="/roadmap" className="btn btn-sm btn-primary">
-                      {nextOptional ? 'Revisar próxima lección' : 'Explorar roadmap'} <ArrowRight size={13} />
-                    </Link>
+                    {nextOptional && !nextOptional.started && (
+                      <Link to="/roadmap" className="btn btn-sm">Revisar próxima lección</Link>
+                    )}
+                    {nextOptional && !nextOptional.started && (
+                      <button className="btn btn-sm btn-primary" onClick={() => startDayPlan(nextOptional)}>
+                        Empezar <ArrowRight size={13} />
+                      </button>
+                    )}
+                    {nextOptional?.started && (
+                      <button className="btn btn-sm btn-primary" onClick={() => completeDayPlan(nextOptional)}>
+                        Marcar completada <CheckCircle2 size={13} />
+                      </button>
+                    )}
+                    {!nextOptional && <Link to="/roadmap" className="btn btn-sm btn-primary">Explorar roadmap <ArrowRight size={13} /></Link>}
                   </div>
                 </div>
               </>

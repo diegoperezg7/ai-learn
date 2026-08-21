@@ -134,6 +134,7 @@ class ChecklistItem(Base):
     task_id = Column(Integer, ForeignKey("tasks.id", ondelete="CASCADE"), nullable=False)
     text = Column(String(400), nullable=False)
     done = Column(Boolean, default=False)
+    started = Column(Boolean, default=False, nullable=False)
     sort_order = Column(Integer, default=0)
 
     task: Mapped[Task] = relationship(back_populates="checklist")

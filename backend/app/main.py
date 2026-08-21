@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from . import seed
 from .config import settings
 from .database import Base, SessionLocal, engine
+from sqlalchemy import text
 from .dependencies import CurrentUser, get_current_user
 from .routers import growth, skills, tasks, tracking
 from .services import notifier
@@ -27,6 +28,11 @@ async def lifespan(_app: FastAPI):
         db_path.parent.mkdir(parents=True, exist_ok=True)
 
     Base.metadata.create_all(bind=engine)
+    with engine.begin() as conn:
+        try:
+            conn.execute(text("ALTER TABLE day_plans ADD COLUMN started BOOLEAN NOT NULL DEFAULT FALSE"))
+        except Exception:
+            pass
     with SessionLocal() as db:
         seed.run(db)
         notifier.refresh(db)

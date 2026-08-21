@@ -126,6 +126,7 @@ class ChecklistItemOut(ORMModel):
     id: int
     text: str
     done: bool
+    started: bool = False
     sort_order: int
 
 
@@ -202,6 +203,7 @@ class DayPlanOut(ORMModel):
 
 class DayPlanUpdate(BaseModel):
     done: bool | None = None
+    started: bool | None = None
     scope: str | None = None
     minutes: int | None = None
 

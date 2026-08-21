@@ -80,6 +80,18 @@ def complete_day(plan_id: int, minutes: int | None = None, db: Session = Depends
     return plan
 
 
+@router.post("/days/{plan_id}/start", response_model=DayPlanOut)
+def start_day(plan_id: int, db: Session = Depends(get_db)) -> DayPlan:
+    plan = db.get(DayPlan, plan_id)
+    if not plan:
+        raise HTTPException(404, "Sesion no encontrada")
+    if not plan.done:
+        plan.started = True
+        db.commit()
+        db.refresh(plan)
+    return plan
+
+
 # ------------------------------------------------------------------ sessions
 
 
