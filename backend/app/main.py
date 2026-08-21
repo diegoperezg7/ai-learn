@@ -28,10 +28,12 @@ async def lifespan(_app: FastAPI):
         db_path.parent.mkdir(parents=True, exist_ok=True)
 
     Base.metadata.create_all(bind=engine)
-    with engine.begin() as conn:
+    for table in ("day_plans", "checklist_items"):
         try:
-            conn.execute(text("ALTER TABLE day_plans ADD COLUMN started BOOLEAN NOT NULL DEFAULT FALSE"))
+            with engine.begin() as conn:
+                conn.execute(text(f"ALTER TABLE {table} ADD COLUMN started BOOLEAN NOT NULL DEFAULT FALSE"))
         except Exception:
+            # Column already exists on databases that were created after the migration.
             pass
     with SessionLocal() as db:
         seed.run(db)
