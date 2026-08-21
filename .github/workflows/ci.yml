@@ -32,8 +32,13 @@ jobs:
 
     steps:
       - name: Actualizar código de producción
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git -C /Users/darce/Documents/ChatGPT/AI-Mastery-hub pull --ff-only origin main
+          git -C /Users/darce/Documents/ChatGPT/AI-Mastery-hub \
+            -c http.extraheader="AUTHORIZATION: bearer $GITHUB_TOKEN" \
+            pull --ff-only origin main
+
 
       - name: Reconstruir y arrancar la aplicación
         working-directory: /Users/darce/Documents/ChatGPT/AI-Mastery-hub
