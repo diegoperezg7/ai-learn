@@ -1,6 +1,8 @@
 <div align="center">
 
-# AI Mastery Hub
+# AI-Learn
+
+<img src="frontend/public/assets/ai-learn-wordmark.png" width="520" alt="AI-Learn">
 
 **El sistema operativo de mi carrera técnica como AI Engineer.**
 Qué toca hoy, cuánto llevo de verdad, qué skills flojean y un currículum que solo crece con evidencia.

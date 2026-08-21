@@ -24,8 +24,9 @@ def _env_date(key: str, default: str) -> date:
 
 @dataclass(frozen=True)
 class Settings:
-    app_name: str = "AI Mastery Hub"
+    app_name: str = "AI-Learn"
     database_url: str = field(default_factory=lambda: _env("DATABASE_URL", "sqlite:///./data/hub.db"))
+    database_schema: str = field(default_factory=lambda: _env("DATABASE_SCHEMA", "public"))
 
     # Portal integration. When the app sits behind darc3 auth-proxy, Caddy injects X-Auth-* headers.
     require_portal_auth: bool = field(default_factory=lambda: _env_bool("REQUIRE_PORTAL_AUTH", False))

@@ -16,7 +16,11 @@ class Base(DeclarativeBase):
 
 engine = create_engine(
     settings.database_url,
-    connect_args={"check_same_thread": False} if settings.database_url.startswith("sqlite") else {},
+    connect_args=(
+        {"check_same_thread": False}
+        if settings.database_url.startswith("sqlite")
+        else {"options": f"-csearch_path={settings.database_schema},public"}
+    ),
     future=True,
 )
 
@@ -28,6 +32,15 @@ def _set_sqlite_pragma(dbapi_connection, _connection_record):
         cursor = dbapi_connection.cursor()
         cursor.execute("PRAGMA foreign_keys=ON")
         cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.close()
+
+
+@event.listens_for(engine, "connect")
+def _set_postgres_schema(dbapi_connection, _connection_record):
+    if not settings.database_url.startswith("sqlite"):
+        cursor = dbapi_connection.cursor()
+        cursor.execute(f"CREATE SCHEMA IF NOT EXISTS {settings.database_schema}")
+        cursor.execute(f"SET search_path TO {settings.database_schema}, public")
         cursor.close()
 
 

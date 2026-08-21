@@ -4,8 +4,10 @@
 # los alcance por nombre y AIdentity inyecte las cabeceras X-Auth-*.
 services:
   hub-api:
-    networks: [hub, auth-proxy_default]
+    networks: [hub, auth-proxy_default, supabase_default]
     environment:
+      DATABASE_URL: postgresql+psycopg://postgres:${POSTGRES_PASSWORD}@supabase-db:5432/postgres
+      DATABASE_SCHEMA: ai_learn
       REQUIRE_PORTAL_AUTH: "true"
 
   hub-web:
@@ -13,4 +15,6 @@ services:
 
 networks:
   auth-proxy_default:
+    external: true
+  supabase_default:
     external: true

@@ -108,8 +108,12 @@ export default function App() {
 
       <aside className={`sidebar ${navOpen ? 'open' : ''}`}>
         <div className="brand">
-          <span className="brand-mark"><Rocket size={17} /></span>
-          <span>AI Mastery Hub</span>
+          <span className="brand-mark">
+            <img
+              src="/assets/ai-learn-wordmark.png"
+              alt="AI-Learn"
+            />
+          </span>
         </div>
         {NAV.map((group) => (
           <div key={group.section}>
@@ -143,7 +147,7 @@ export default function App() {
           <button className="btn btn-ghost btn-icon mobile-only" onClick={() => setNavOpen(true)} aria-label="Menú">
             <Menu size={18} />
           </button>
-          <h1>{dashboard?.current_week_label ?? 'AI Mastery Hub'}</h1>
+          <h1>{dashboard?.current_week_label ?? 'AI-Learn'}</h1>
           <span className="spacer" />
           <button className="btn btn-ghost btn-icon" onClick={() => setLang(lang === 'es' ? 'en' : 'es')} title="ES / EN">
             <Languages size={17} />
