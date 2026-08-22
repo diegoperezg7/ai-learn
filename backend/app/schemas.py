@@ -390,6 +390,8 @@ class DashboardOut(BaseModel):
     next_milestone: str
     unread_notifications: int
     today_plan: list[DayPlanOut] = Field(default_factory=list)
+    today_extra_minutes: int = 0
+    today_extra_titles: list[str] = Field(default_factory=list)
     today_minutes_done: int = 0
     today_minutes_planned: int = 0
     questions_due: int = 0

@@ -96,6 +96,11 @@ export function Dashboard() {
               <span>{d.today_minutes_done} de {d.today_minutes_planned} min completados</span>
               <strong>{Math.round(todayPct)}%</strong>
             </div>
+            {d.today_extra_minutes > 0 && (
+              <div className="small" style={{ color: 'var(--success)', marginTop: 7 }}>
+                +{d.today_extra_minutes} min adelantados: {d.today_extra_titles.join(', ')}
+              </div>
+            )}
             {allTodayDone && (
               <>
                 <p className="small" style={{ color: 'var(--success)', marginBottom: 8, marginTop: 8 }}>

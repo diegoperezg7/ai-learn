@@ -192,6 +192,8 @@ export interface Dashboard {
   days_to_core: number
   plan_days_remaining: number
   estimated_completion_date: string | null
+  today_extra_minutes: number
+  today_extra_titles: string[]
   current_week: number | null
   current_week_label: string
   phase: string

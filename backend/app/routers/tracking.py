@@ -99,7 +99,7 @@ def toggle_activity(plan_id: int, activity_id: int, done: bool, db: Session = De
     if not plan or not activity or activity.plan_id != plan_id:
         raise HTTPException(404, "Actividad no encontrada")
     if done and not activity.done:
-        db.add(StudySession(day=plan.day, minutes=activity.minutes, task_id=plan.task_id, mode=plan.mode, notes=activity.title))
+        db.add(StudySession(day=progress.today(), minutes=activity.minutes, task_id=plan.task_id, mode=plan.mode, notes=activity.title))
     activity.done = done
     plan.started = True
     plan.done = bool(plan.activities) and all(a.done for a in plan.activities)
@@ -327,6 +327,18 @@ def dashboard(db: Session = Depends(get_db)) -> DashboardOut:
             InterviewQuestion.next_review.is_not(None), InterviewQuestion.next_review <= ref
         )
     ) or 0
+    today_sessions = db.scalars(
+        select(StudySession).where(
+            (StudySession.day == ref) | (func.date(StudySession.created_at) == ref.isoformat())
+        )
+    ).all()
+    planned_today_minutes = sum(p.minutes for p in today_plan)
+    today_logged_minutes = sum(s.minutes for s in today_sessions)
+    future_activity_titles = {
+        a.title for p in all_plan_days if p.day > ref for a in p.activities
+    }
+    today_extra_titles = sorted({s.notes for s in today_sessions if s.day != ref and s.notes in future_activity_titles})
+    today_extra_minutes = sum(s.minutes for s in today_sessions if s.day != ref and s.notes in future_activity_titles)
 
     return DashboardOut(
         today=ref,
@@ -358,10 +370,9 @@ def dashboard(db: Session = Depends(get_db)) -> DashboardOut:
         next_milestone=next_milestone,
         unread_notifications=int(unread),
         today_plan=[DayPlanOut.model_validate(p) for p in today_plan],
-        today_minutes_done=sum(
-            sum(a.minutes for a in p.activities if a.done) if p.activities else (p.minutes if p.done else 0)
-            for p in today_plan
-        ),
-        today_minutes_planned=sum(p.minutes for p in today_plan),
+        today_minutes_done=today_logged_minutes,
+        today_minutes_planned=planned_today_minutes,
+        today_extra_minutes=today_extra_minutes,
+        today_extra_titles=today_extra_titles,
         questions_due=int(questions_due),
     )
