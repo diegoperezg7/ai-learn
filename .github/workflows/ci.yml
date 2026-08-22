@@ -38,5 +38,9 @@ jobs:
       - name: Reconstruir y arrancar la aplicación
         working-directory: ${{ github.workspace }}
         run: |
-          docker compose up -d --build
-          docker compose ps
+          docker compose -f docker-compose.yml -f docker-compose.portal.yml up -d --build --force-recreate
+          docker compose -f docker-compose.yml -f docker-compose.portal.yml ps
+          docker inspect hub-web --format '{{json .NetworkSettings.Networks}}' | grep -q 'edge-hub'
+          docker inspect hub-api --format '{{json .NetworkSettings.Networks}}' | grep -q 'edge-hub'
+          docker exec hub-web wget -qO- http://127.0.0.1/ >/dev/null
+          docker exec hub-api curl -fsS http://127.0.0.1:8000/api/health >/dev/null
