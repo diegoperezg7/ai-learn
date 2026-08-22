@@ -358,7 +358,10 @@ def dashboard(db: Session = Depends(get_db)) -> DashboardOut:
         next_milestone=next_milestone,
         unread_notifications=int(unread),
         today_plan=[DayPlanOut.model_validate(p) for p in today_plan],
-        today_minutes_done=sum(p.minutes for p in today_plan if p.done),
+        today_minutes_done=sum(
+            sum(a.minutes for a in p.activities if a.done) if p.activities else (p.minutes if p.done else 0)
+            for p in today_plan
+        ),
         today_minutes_planned=sum(p.minutes for p in today_plan),
         questions_due=int(questions_due),
     )

@@ -43,6 +43,8 @@ export function Dashboard() {
 
   const d = dashboard
   const todayDone = d.today_plan.filter((p) => p.done).length
+  const todayActivities = d.today_plan.flatMap((p) => p.activities)
+  const todayActivitiesDone = todayActivities.filter((a) => a.done).length
   const todayPct = d.today_minutes_planned ? (d.today_minutes_done / d.today_minutes_planned) * 100 : 0
   const weekDoneMin = weekPlan.filter((p) => p.done).reduce((a, p) => a + p.minutes, 0)
   const weekTotalMin = weekPlan.reduce((a, p) => a + p.minutes, 0)
@@ -69,7 +71,9 @@ export function Dashboard() {
         <CardHead
           title={d.today_plan.length ? `Hoy · ${d.today_minutes_planned} min` : 'Hoy'}
           icon={allTodayDone ? <CheckCircle2 size={16} style={{ color: 'var(--success)' }} /> : <Flame size={16} style={{ color: 'var(--accent)' }} />}
-          right={d.today_plan.length ? <Badge tone={allTodayDone ? 'success' : 'accent'}>{todayDone}/{d.today_plan.length}</Badge> : undefined}
+          right={d.today_plan.length ? <Badge tone={allTodayDone ? 'success' : 'accent'}>
+            {todayActivities.length ? `${todayActivitiesDone}/${todayActivities.length} actividades` : `${todayDone}/${d.today_plan.length}`}
+          </Badge> : undefined}
         />
 
         {d.today_plan.length === 0 ? (
@@ -87,6 +91,10 @@ export function Dashboard() {
             </div>
             <div style={{ marginTop: 12 }}>
               <ProgressBar value={todayPct} tone={allTodayDone ? 'var(--success)' : undefined} />
+            </div>
+            <div className="row between small dim" style={{ marginTop: 6 }}>
+              <span>{d.today_minutes_done} de {d.today_minutes_planned} min completados</span>
+              <strong>{Math.round(todayPct)}%</strong>
             </div>
             {allTodayDone && (
               <>
@@ -199,6 +207,7 @@ export function Dashboard() {
           <Empty>Semana cerrada. Buen trabajo.</Empty>
         ) : (
           <div className="col" style={{ gap: 6 }}>
+            <div className="small dim" style={{ marginBottom: 2 }}>Después de hoy, sigue esto:</div>
             {restOfWeek.map((p) => (
               <div key={p.id} className="row upcoming" style={{ gap: 10 }}>
                 <span className="badge" style={{ minWidth: 62, justifyContent: 'center' }}>{fmtDate(p.day, lang)}</span>
