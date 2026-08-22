@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { Badge, CATEGORY_COLOR, Card, Empty, fmtHours } from '../components/ui'
-import { TaskCard } from '../components/TaskCard'
 import { DaySession } from '../components/DaySession'
 import { useData, usePrefs, useT } from '../store/useStore'
 
@@ -94,7 +93,7 @@ export function Timeline() {
 export function CalendarPage() {
   const t = useT()
   const lang = usePrefs((s) => s.lang)
-  const { tasks, days } = useData()
+  const { days } = useData()
   const [cursor, setCursor] = useState(() => {
     const d = new Date()
     return new Date(d.getFullYear(), d.getMonth(), 1)
