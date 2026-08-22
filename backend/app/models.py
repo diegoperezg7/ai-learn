@@ -233,6 +233,20 @@ class DayPlan(Base):
 
     task: Mapped["Task | None"] = relationship()
     resource: Mapped["Resource | None"] = relationship()
+    activities: Mapped[list["DayPlanActivity"]] = relationship(back_populates="plan", cascade="all, delete-orphan", order_by="DayPlanActivity.sort_order")
+
+
+class DayPlanActivity(Base):
+    __tablename__ = "day_plan_activities"
+
+    id = Column(Integer, primary_key=True)
+    plan_id = Column(Integer, ForeignKey("day_plans.id", ondelete="CASCADE"), nullable=False)
+    title = Column(String(300), nullable=False)
+    minutes = Column(Integer, default=25)
+    url = Column(String(500), default="")
+    done = Column(Boolean, default=False, nullable=False)
+    sort_order = Column(Integer, default=0)
+    plan: Mapped[DayPlan] = relationship(back_populates="activities")
 
 
 class CVDocument(Base):

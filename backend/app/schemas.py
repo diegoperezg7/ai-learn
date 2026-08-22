@@ -187,6 +187,14 @@ class TaskOut(TaskBase, ORMModel):
 # ---------------------------------------------------------------- day plan
 
 
+class DayPlanActivityOut(ORMModel):
+    id: int
+    title: str
+    minutes: int
+    url: str = ""
+    done: bool
+
+
 class DayPlanOut(ORMModel):
     id: int
     day: date
@@ -199,6 +207,7 @@ class DayPlanOut(ORMModel):
     done: bool
     task_id: int | None
     resource: ResourceRef | None = None
+    activities: list[DayPlanActivityOut] = Field(default_factory=list)
 
 
 class DayPlanUpdate(BaseModel):

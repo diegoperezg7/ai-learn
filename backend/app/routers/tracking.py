@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from ..config import settings
 from ..database import get_db
-from ..models import DayPlan, InterviewQuestion, Notification, Skill, StudySession, Task, WeeklyReview
+from ..models import DayPlan, DayPlanActivity, InterviewQuestion, Notification, Skill, StudySession, Task, WeeklyReview
 from ..schemas import (
     CategoryStat,
     DashboardOut,
@@ -89,6 +89,21 @@ def start_day(plan_id: int, db: Session = Depends(get_db)) -> DayPlan:
         plan.started = True
         db.commit()
         db.refresh(plan)
+    return plan
+
+
+@router.patch("/days/{plan_id}/activities/{activity_id}", response_model=DayPlanOut)
+def toggle_activity(plan_id: int, activity_id: int, done: bool, db: Session = Depends(get_db)) -> DayPlan:
+    plan = db.get(DayPlan, plan_id)
+    activity = db.get(DayPlanActivity, activity_id)
+    if not plan or not activity or activity.plan_id != plan_id:
+        raise HTTPException(404, "Actividad no encontrada")
+    if done and not activity.done:
+        db.add(StudySession(day=plan.day, minutes=activity.minutes, task_id=plan.task_id, mode=plan.mode, notes=activity.title))
+    activity.done = done
+    plan.started = True
+    plan.done = bool(plan.activities) and all(a.done for a in plan.activities)
+    db.commit(); db.refresh(plan)
     return plan
 
 

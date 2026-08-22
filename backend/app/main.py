@@ -10,6 +10,7 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import seed
+from .models import DayPlan, DayPlanActivity
 from .config import settings
 from .database import Base, SessionLocal, engine
 from sqlalchemy import text
@@ -37,6 +38,14 @@ async def lifespan(_app: FastAPI):
             pass
     with SessionLocal() as db:
         seed.run(db)
+        plan = db.query(DayPlan).filter(DayPlan.title == "Exercism · los tres primeros del track").first()
+        if plan and not plan.activities:
+            plan.activities = [
+                DayPlanActivity(title="Guido's Gorgeous Lasagna", minutes=25, url="https://exercism.org/tracks/python/exercises/lasagna", sort_order=0),
+                DayPlanActivity(title="Ghost Gobble", minutes=25, url="https://exercism.org/tracks/python/exercises/ghost-gobble-arcade-game", sort_order=1),
+                DayPlanActivity(title="Currency Exchange", minutes=25, url="https://exercism.org/tracks/python/exercises/currency-exchange", sort_order=2),
+            ]
+            db.commit()
         notifier.refresh(db)
     log.info("AI Mastery Hub listo. Sprint %s -> %s", settings.sprint_start, settings.core_deadline)
     yield

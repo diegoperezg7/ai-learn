@@ -104,6 +104,7 @@ export interface DayPlan {
   started: boolean
   task_id: number | null
   resource: ResourceRef | null
+  activities: { id: number; title: string; minutes: number; url: string; done: boolean }[]
 }
 
 export interface StudySession {
@@ -253,6 +254,7 @@ export const api = {
   updateDay: (id: number, body: { done?: boolean; scope?: string; minutes?: number }) =>
     patch<DayPlan>(`/days/${id}`, body),
   startDay: (id: number) => post<DayPlan>(`/days/${id}/start`),
+  toggleActivity: (planId: number, activityId: number, done: boolean) => patch<DayPlan>(`/days/${planId}/activities/${activityId}?done=${done}`, {}),
   completeDay: (id: number, minutes?: number) =>
     post<DayPlan>(`/days/${id}/complete${minutes ? `?minutes=${minutes}` : ''}`),
 
