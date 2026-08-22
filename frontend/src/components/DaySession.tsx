@@ -52,7 +52,7 @@ export function DaySession({ plan, compact = false }: { plan: DayPlan; compact?:
             rel="noreferrer"
             style={{ alignSelf: 'flex-start', maxWidth: '100%', whiteSpace: 'normal', textAlign: 'left' }}
           >
-            <ExternalLink size={11} /> Abrir {plan.resource.name}
+            <ExternalLink size={11} /> Abrir recurso · {plan.resource.name}
           </a>
         )}
         {!compact && links.length > 0 && (

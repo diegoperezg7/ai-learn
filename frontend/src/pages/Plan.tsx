@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import { Badge, CATEGORY_COLOR, Card, Empty, fmtHours } from '../components/ui'
 import { TaskCard } from '../components/TaskCard'
+import { DaySession } from '../components/DaySession'
 import { useData, usePrefs, useT } from '../store/useStore'
 
 const DAY = 86400000
@@ -93,7 +94,7 @@ export function Timeline() {
 export function CalendarPage() {
   const t = useT()
   const lang = usePrefs((s) => s.lang)
-  const { tasks } = useData()
+  const { tasks, days } = useData()
   const [cursor, setCursor] = useState(() => {
     const d = new Date()
     return new Date(d.getFullYear(), d.getMonth(), 1)
@@ -112,13 +113,12 @@ export function CalendarPage() {
     })
   }, [cursor])
 
-  const tasksOn = (iso: string) =>
-    tasks.filter((x) => x.start_date && x.deadline && iso >= x.start_date && iso <= x.deadline && x.phase !== 'Japan break')
+  const plansOn = (iso: string) => days.filter((x) => x.day === iso)
 
   const todayIso = new Date().toISOString().slice(0, 10)
   const monthName = cursor.toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-GB', { month: 'long', year: 'numeric' })
   const dayNames = lang === 'es' ? ['L', 'M', 'X', 'J', 'V', 'S', 'D'] : ['M', 'T', 'W', 'T', 'F', 'S', 'S']
-  const selected = tasksOn(picked)
+  const selected = plansOn(picked)
 
   return (
     <>
@@ -146,7 +146,7 @@ export function CalendarPage() {
             {cells.map((d) => {
               const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
               const inMonth = d.getMonth() === cursor.getMonth()
-              const dayTasks = tasksOn(iso)
+              const dayPlans = plansOn(iso)
               const isToday = iso === todayIso
               const isPicked = iso === picked
               return (
@@ -164,8 +164,8 @@ export function CalendarPage() {
                 >
                   <span className="small" style={{ fontWeight: isToday ? 800 : 500 }}>{d.getDate()}</span>
                   <div className="row" style={{ gap: 2, flexWrap: 'wrap', justifyContent: 'center' }}>
-                    {dayTasks.slice(0, 3).map((x) => (
-                      <span key={x.id} style={{ width: 5, height: 5, borderRadius: 99, background: CATEGORY_COLOR[x.category] }} />
+                    {dayPlans.slice(0, 3).map((x) => (
+                      <span key={x.id} style={{ width: 5, height: 5, borderRadius: 99, background: x.done ? 'var(--success)' : x.mode === 'Work' ? 'var(--warning)' : 'var(--accent)' }} />
                     ))}
                   </div>
                 </button>
@@ -177,10 +177,10 @@ export function CalendarPage() {
         <Card>
           <div className="row" style={{ marginBottom: 12, gap: 8 }}>
             <strong>{picked}</strong>
-            <Badge>{selected.length} tarea(s)</Badge>
+            <Badge>{selected.length} sesión(es)</Badge>
           </div>
           {selected.length === 0 ? <Empty>Día libre</Empty> : (
-            <div className="col" style={{ gap: 8 }}>{selected.map((x) => <TaskCard key={x.id} task={x} showDates={false} />)}</div>
+            <div className="col" style={{ gap: 8 }}>{selected.map((x) => <DaySession key={x.id} plan={x} />)}</div>
           )}
         </Card>
       </div>
