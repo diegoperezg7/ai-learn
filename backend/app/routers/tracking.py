@@ -329,7 +329,7 @@ def dashboard(db: Session = Depends(get_db)) -> DashboardOut:
     ) or 0
     today_sessions = db.scalars(
         select(StudySession).where(
-            (StudySession.day == ref) | (func.date(StudySession.created_at) == ref.isoformat())
+            (StudySession.day == ref) | (func.date(StudySession.created_at) == ref)
         )
     ).all()
     planned_today_minutes = sum(p.minutes for p in today_plan)
