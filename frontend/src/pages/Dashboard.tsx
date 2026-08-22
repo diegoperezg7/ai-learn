@@ -153,9 +153,10 @@ export function Dashboard() {
           <div className="stat-sub">días seguidos</div>
         </Card>
         <Card>
-          <div className="stat-label">Al deadline</div>
-          <div className="stat-value">{d.days_to_core}</div>
-          <div className="stat-sub">días · {d.completion}% del plan</div>
+          <div className="stat-label">Plan restante</div>
+          <div className="stat-value">{d.plan_days_remaining}</div>
+          <div className="stat-sub">días · termina {d.estimated_completion_date ? fmtDate(d.estimated_completion_date, lang) : '—'}</div>
+          <div className="small dim" style={{ marginTop: 4 }}>Deadline: {d.days_to_core} días</div>
         </Card>
       </div>
 

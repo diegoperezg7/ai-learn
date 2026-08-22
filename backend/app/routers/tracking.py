@@ -317,6 +317,11 @@ def dashboard(db: Session = Depends(get_db)) -> DashboardOut:
     today_plan = db.scalars(
         select(DayPlan).where(DayPlan.day == ref).order_by(DayPlan.slot)
     ).unique().all()
+    # Dynamic forecast: a day remains in the plan while at least one session
+    # (or one child activity) is unfinished. This moves forward naturally when
+    # the learner completes only part of a multi-activity session.
+    all_plan_days = db.scalars(select(DayPlan).where(DayPlan.day >= ref)).unique().all()
+    pending_plan_days = sorted({p.day for p in all_plan_days if not p.done})
     questions_due = db.scalar(
         select(func.count(InterviewQuestion.id)).where(
             InterviewQuestion.next_review.is_not(None), InterviewQuestion.next_review <= ref
@@ -329,6 +334,8 @@ def dashboard(db: Session = Depends(get_db)) -> DashboardOut:
         core_deadline=settings.core_deadline,
         final_deadline=settings.final_deadline,
         days_to_core=(settings.core_deadline - ref).days,
+        plan_days_remaining=len(pending_plan_days),
+        estimated_completion_date=pending_plan_days[-1] if pending_plan_days else ref,
         current_week=current_week,
         current_week_label=week_label,
         phase=phase,

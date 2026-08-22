@@ -366,6 +366,8 @@ class DashboardOut(BaseModel):
     core_deadline: date
     final_deadline: date
     days_to_core: int
+    plan_days_remaining: int
+    estimated_completion_date: date | None = None
     current_week: int | None
     current_week_label: str
     phase: str

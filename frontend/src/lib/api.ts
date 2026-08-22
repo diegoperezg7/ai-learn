@@ -190,6 +190,8 @@ export interface Dashboard {
   core_deadline: string
   final_deadline: string
   days_to_core: number
+  plan_days_remaining: number
+  estimated_completion_date: string | null
   current_week: number | null
   current_week_label: string
   phase: string
