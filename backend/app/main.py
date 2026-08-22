@@ -38,14 +38,32 @@ async def lifespan(_app: FastAPI):
             pass
     with SessionLocal() as db:
         seed.run(db)
-        plan = db.query(DayPlan).filter(DayPlan.title == "Exercism · los tres primeros del track").first()
-        if plan and not plan.activities:
-            plan.activities = [
-                DayPlanActivity(title="Guido's Gorgeous Lasagna", minutes=25, url="https://exercism.org/tracks/python/exercises/lasagna", sort_order=0),
-                DayPlanActivity(title="Ghost Gobble", minutes=25, url="https://exercism.org/tracks/python/exercises/ghost-gobble-arcade-game", sort_order=1),
-                DayPlanActivity(title="Currency Exchange", minutes=25, url="https://exercism.org/tracks/python/exercises/currency-exchange", sort_order=2),
-            ]
-            db.commit()
+        activity_sets = {
+            "Exercism · los tres primeros del track": [
+                ("Guido's Gorgeous Lasagna", 25, "https://exercism.org/tracks/python/exercises/lasagna"),
+                ("Ghost Gobble", 25, "https://exercism.org/tracks/python/exercises/ghost-gobble-arcade-game"),
+                ("Currency Exchange", 25, "https://exercism.org/tracks/python/exercises/currency-exchange"),
+            ],
+            "LangChain Essentials · lecciones 1–5 y 7": [
+                ("Create Agent", 18, "https://academy.langchain.com/courses/langchain-essentials-python"),
+                ("Models and Messages", 18, "https://academy.langchain.com/courses/langchain-essentials-python"),
+                ("Streaming", 18, "https://academy.langchain.com/courses/langchain-essentials-python"),
+                ("Tools", 18, "https://academy.langchain.com/courses/langchain-essentials-python"),
+                ("Structured Output", 18, "https://academy.langchain.com/courses/langchain-essentials-python"),
+            ],
+            "Richards · lecciones 161 y 159": [
+                ("Lección 161 · Agility and Monolithic Architectures", 30, "https://www.developertoarchitect.com/lessons/"),
+                ("Lección 159 · Modular Monolith Architecture", 30, "https://www.developertoarchitect.com/lessons/"),
+            ],
+        }
+        for title, specs in activity_sets.items():
+            plan = db.query(DayPlan).filter(DayPlan.title == title).first()
+            if plan and not plan.activities:
+                plan.activities = [
+                    DayPlanActivity(title=name, minutes=minutes, url=url, sort_order=index)
+                    for index, (name, minutes, url) in enumerate(specs)
+                ]
+        db.commit()
         notifier.refresh(db)
     log.info("AI Mastery Hub listo. Sprint %s -> %s", settings.sprint_start, settings.core_deadline)
     yield
