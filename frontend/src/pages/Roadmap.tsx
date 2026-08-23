@@ -66,7 +66,19 @@ export function Roadmap() {
 
     const filtered = inTab.filter((x) => {
       if (hideDone && DONE.has(x.status)) return false
-      if (needle && !`${x.title} ${x.deliverable}`.toLowerCase().includes(needle)) return false
+      if (needle) {
+        const sessionText = days
+          .filter((plan) => plan.task_id === x.id)
+          .flatMap((plan) => [
+            plan.title,
+            plan.scope,
+            plan.resource?.name ?? '',
+            ...plan.activities.map((activity) => activity.title),
+          ])
+          .join(' ')
+        const searchable = `${x.title} ${x.description} ${x.category} ${x.deliverable} ${sessionText}`.toLowerCase()
+        if (!searchable.includes(needle)) return false
+      }
       return true
     })
 
@@ -91,7 +103,7 @@ export function Roadmap() {
     return [...map.values()]
       .map((g) => ({ ...g, tasks: g.tasks.sort((a, b) => a.sort_order - b.sort_order) }))
       .sort((a, b) => a.order - b.order)
-  }, [tasks, tab, q, hideDone, weekMeta, t])
+  }, [tasks, days, tab, q, hideDone, weekMeta, t])
 
   const sprintTasks = tasks.filter((x) => x.phase === 'Sprint 12w')
   const sprintDone = sprintTasks.filter((x) => DONE.has(x.status)).length
