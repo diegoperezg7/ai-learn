@@ -157,7 +157,7 @@ export function Skills() {
                         <Logo icon={s.icon} dark={theme === 'dark'} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontWeight: 650 }}>{s.name}</div>
-                          <div className="small dim">{fmtHours(s.hours_logged)} · {s.tasks_done}/{s.tasks_total} tareas</div>
+                          <div className="small dim">{fmtHours(s.hours_logged)} · {s.tasks_done}/{s.tasks_total} tareas · {Math.round(s.evidence_percent)}% evidencia</div>
                         </div>
                         <Badge tone={PRIORITY_TONE[s.priority]}>{s.priority}</Badge>
                       </div>

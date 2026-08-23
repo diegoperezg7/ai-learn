@@ -66,6 +66,7 @@ class SkillOut(SkillBase, ORMModel):
     questions_total: int = 0
     questions_ready: int = 0
     hours_logged: float = 0
+    evidence_percent: float = 0
 
 
 # ---------------------------------------------------------------- resources

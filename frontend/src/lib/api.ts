@@ -46,6 +46,7 @@ export interface Skill extends SkillRef {
   questions_total: number
   questions_ready: number
   hours_logged: number
+  evidence_percent: number
 }
 
 export interface ResourceRef { id: number; name: string; url: string; icon: string; provider: string }

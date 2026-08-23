@@ -23,11 +23,20 @@ router = APIRouter(tags=["catalog"])
 
 def _skill_out(skill: Skill, rollup: dict) -> SkillOut:
     data = SkillOut.model_validate(skill)
+    derived_level = int(rollup.get("derived_level", skill.current_level or 0))
+    data.current_level = max(skill.current_level or 0, derived_level)
+    if data.current_level >= data.target_level:
+        data.status = "Interview Ready"
+    elif data.current_level >= 3 and data.status in {"Not Started", "Learning"}:
+        data.status = "Practicing"
+    elif data.current_level >= 1 and data.status == "Not Started":
+        data.status = "Learning"
     data.tasks_total = int(rollup.get("tasks_total", 0))
     data.tasks_done = int(rollup.get("tasks_done", 0))
     data.questions_total = int(rollup.get("questions_total", 0))
     data.questions_ready = int(rollup.get("questions_ready", 0))
     data.hours_logged = float(rollup.get("hours_logged", 0))
+    data.evidence_percent = float(rollup.get("evidence_percent", 0))
     return data
 
 

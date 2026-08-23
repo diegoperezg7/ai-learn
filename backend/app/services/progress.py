@@ -174,17 +174,53 @@ def interview_counts(db: Session) -> tuple[int, int]:
 
 
 def skill_rollups(db: Session) -> dict[int, dict[str, float]]:
-    """Per-skill task/question/hour counters used by the Skills page."""
+    """Per-skill evidence counters and a conservative derived level.
+
+    A skill grows from several kinds of evidence instead of a single checkbox:
+    completed roadmap tasks (35%), completed child activities (35%), finished
+    linked resources (15%) and logged time against the skill (15%). Manual
+    levels are treated as a floor so verified progress is never erased.
+    """
     per_skill_hours = hours_by_skill(db)
     out: dict[int, dict[str, float]] = {}
     for skill in db.scalars(select(Skill)).unique().all():
         tasks = skill.tasks
         questions = skill.questions
+        task_ids = {task.id for task in tasks}
+        plans = db.scalars(select(DayPlan).where(DayPlan.task_id.in_(task_ids))).unique().all() if task_ids else []
+        activities = [activity for plan in plans for activity in plan.activities]
+        activity_ratio = (
+            sum(1 for activity in activities if activity.done) / len(activities)
+            if activities else sum(1 for task in tasks if task.status in DONE_STATUSES) / len(tasks) if tasks else 0
+        )
+        task_ratio = sum(1 for task in tasks if task.status in DONE_STATUSES) / len(tasks) if tasks else 0
+        resource_ratio = (
+            sum(1 for resource in skill.resources if resource.status == "Done") / len(skill.resources)
+            if skill.resources else 0
+        )
+        planned_hours = sum(task.estimated_hours or 0 for task in tasks)
+        hours_ratio = min(1.0, per_skill_hours.get(skill.id, 0) / planned_hours) if planned_hours else 0
+        evidence = (task_ratio * 0.35) + (activity_ratio * 0.35) + (resource_ratio * 0.15) + (hours_ratio * 0.15)
+        if evidence >= 0.90:
+            derived_level = 5
+        elif evidence >= 0.70:
+            derived_level = 4
+        elif evidence >= 0.50:
+            derived_level = 3
+        elif evidence >= 0.25:
+            derived_level = 2
+        elif evidence > 0:
+            derived_level = 1
+        else:
+            derived_level = 0
+        level = max(skill.current_level or 0, derived_level)
         out[skill.id] = {
             "tasks_total": len(tasks),
             "tasks_done": sum(1 for t in tasks if t.status in DONE_STATUSES),
             "questions_total": len(questions),
             "questions_ready": sum(1 for q in questions if q.can_explain and q.can_implement),
             "hours_logged": per_skill_hours.get(skill.id, 0.0),
+            "derived_level": level,
+            "evidence_percent": round(evidence * 100, 1),
         }
     return out
