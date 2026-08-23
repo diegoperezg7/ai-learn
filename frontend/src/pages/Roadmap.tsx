@@ -178,8 +178,9 @@ export function Roadmap() {
                 {isOpen && (
                   <div className="col" style={{ gap: 10, marginTop: 12 }}>
                     {(() => {
+                      const visibleTaskIds = new Set(g.tasks.map((task) => task.id))
                       const weekDays = days
-                        .filter((p) => p.week === g.order)
+                        .filter((p) => p.week === g.order && visibleTaskIds.has(p.task_id ?? -1) && (!hideDone || !p.done))
                         .sort((a, b) => a.day.localeCompare(b.day) || a.slot - b.slot)
                       const byDay = new Map<string, typeof weekDays>()
                       weekDays.forEach((p) => byDay.set(p.day, [...(byDay.get(p.day) ?? []), p]))
