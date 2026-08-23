@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { ExternalLink, Star } from 'lucide-react'
 
-import { Badge, Card, Empty, PRIORITY_TONE, STATUS_TONE } from '../components/ui'
+import { Badge, Card, Empty, PRIORITY_TONE, ProgressBar, STATUS_TONE } from '../components/ui'
 import { Logo } from '../lib/logos'
 import { useData, usePrefs, useT } from '../store/useStore'
 
@@ -73,6 +73,13 @@ export function Resources() {
                     ))}
                   </div>
                   {r.verdict && <p className="small muted" style={{ margin: '0 0 8px' }}><strong>{t('res.verdict')}: </strong>{r.verdict}</p>}
+                  <div style={{ maxWidth: 520, marginBottom: 10 }}>
+                    <div className="row between small dim">
+                      <span>{r.activities_total ? `${r.activities_done}/${r.activities_total} actividades` : `${r.tasks_done}/${r.tasks_total} tareas`}</span>
+                      <span>{r.hours_logged} h registradas</span>
+                    </div>
+                    <ProgressBar value={r.activities_total ? (r.activities_done / r.activities_total) * 100 : r.tasks_total ? (r.tasks_done / r.tasks_total) * 100 : 0} thin />
+                  </div>
                   <div className="row" style={{ gap: 6 }}>
                     <Badge tone={STATUS_TONE[r.status]}>{r.status}</Badge>
                     <select

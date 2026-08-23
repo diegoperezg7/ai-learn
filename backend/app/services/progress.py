@@ -11,7 +11,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from ..config import settings
-from ..models import DayPlan, InterviewQuestion, Skill, StudySession, Task, WeeklyReview
+from ..models import DayPlan, InterviewQuestion, Resource, Skill, StudySession, Task, WeeklyReview
 
 DONE_STATUSES = {"Completed", "Interview Ready"}
 
@@ -222,5 +222,25 @@ def skill_rollups(db: Session) -> dict[int, dict[str, float]]:
             "hours_logged": per_skill_hours.get(skill.id, 0.0),
             "derived_level": level,
             "evidence_percent": round(evidence * 100, 1),
+            "activities_total": len(activities),
+            "activities_done": sum(1 for activity in activities if activity.done),
         }
+
     return out
+
+
+def resource_rollups(db: Session) -> dict[int, dict[str, float]]:
+    """Show the roadmap evidence attached to each learning resource."""
+    result: dict[int, dict[str, float]] = {}
+    for resource in db.scalars(select(Resource)).unique().all():
+        tasks = resource.tasks
+        plans = db.scalars(select(DayPlan).where(DayPlan.task_id.in_({task.id for task in tasks}))).unique().all() if tasks else []
+        activities = [activity for plan in plans for activity in plan.activities]
+        result[resource.id] = {
+            "tasks_total": len(tasks),
+            "tasks_done": sum(1 for task in tasks if task.status in DONE_STATUSES),
+            "activities_total": len(activities),
+            "activities_done": sum(1 for activity in activities if activity.done),
+            "hours_logged": round(sum(hours_for_task(db, task.id) for task in tasks), 2),
+        }
+    return result

@@ -47,6 +47,9 @@ export interface Skill extends SkillRef {
   questions_ready: number
   hours_logged: number
   evidence_percent: number
+  activities_total: number
+  activities_done: number
+  linked_resources: ResourceRef[]
 }
 
 export interface ResourceRef { id: number; name: string; url: string; icon: string; provider: string }
@@ -62,6 +65,11 @@ export interface Resource extends ResourceRef {
   verdict: string
   notes: string
   skills: SkillRef[]
+  tasks_total: number
+  tasks_done: number
+  activities_total: number
+  activities_done: number
+  hours_logged: number
 }
 
 export interface ChecklistItem { id: number; text: string; done: boolean; sort_order: number }

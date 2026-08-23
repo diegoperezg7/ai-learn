@@ -37,6 +37,9 @@ def _skill_out(skill: Skill, rollup: dict) -> SkillOut:
     data.questions_ready = int(rollup.get("questions_ready", 0))
     data.hours_logged = float(rollup.get("hours_logged", 0))
     data.evidence_percent = float(rollup.get("evidence_percent", 0))
+    data.activities_total = int(rollup.get("activities_total", 0))
+    data.activities_done = int(rollup.get("activities_done", 0))
+    data.linked_resources = skill.resources
     return data
 
 
@@ -113,7 +116,15 @@ def delete_skill(skill_id: int, db: Session = Depends(get_db)) -> None:
 
 @router.get("/resources", response_model=list[ResourceOut])
 def list_resources(db: Session = Depends(get_db)) -> list[Resource]:
-    return db.scalars(select(Resource).order_by(Resource.priority, Resource.name)).unique().all()
+    resources = db.scalars(select(Resource).order_by(Resource.priority, Resource.name)).unique().all()
+    rollups = progress.resource_rollups(db)
+    output = []
+    for resource in resources:
+        data = ResourceOut.model_validate(resource)
+        for field in ("tasks_total", "tasks_done", "activities_total", "activities_done", "hours_logged"):
+            setattr(data, field, rollups.get(resource.id, {}).get(field, 0))
+        output.append(data)
+    return output
 
 
 @router.post("/resources", response_model=ResourceOut, status_code=201)

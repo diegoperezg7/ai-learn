@@ -58,6 +58,14 @@ class SkillUpdate(BaseModel):
     color: str | None = None
 
 
+class ResourceRef(ORMModel):
+    id: int
+    name: str
+    url: str = ""
+    icon: str = ""
+    provider: str = ""
+
+
 class SkillOut(SkillBase, ORMModel):
     id: int
     slug: str
@@ -67,17 +75,12 @@ class SkillOut(SkillBase, ORMModel):
     questions_ready: int = 0
     hours_logged: float = 0
     evidence_percent: float = 0
+    activities_total: int = 0
+    activities_done: int = 0
+    linked_resources: list[ResourceRef] = Field(default_factory=list)
 
 
 # ---------------------------------------------------------------- resources
-
-
-class ResourceRef(ORMModel):
-    id: int
-    name: str
-    url: str = ""
-    icon: str = ""
-    provider: str = ""
 
 
 class ResourceBase(BaseModel):
@@ -112,6 +115,11 @@ class ResourceUpdate(BaseModel):
 class ResourceOut(ResourceBase, ORMModel):
     id: int
     skills: list[SkillRef] = Field(default_factory=list)
+    tasks_total: int = 0
+    tasks_done: int = 0
+    activities_total: int = 0
+    activities_done: int = 0
+    hours_logged: float = 0
 
 
 # ---------------------------------------------------------------- checklist

@@ -60,6 +60,7 @@ function SkillModal({ skill, onClose }: { skill: Skill; onClose: () => void }) {
         <Badge tone={PRIORITY_TONE[skill.priority]}>{skill.priority}</Badge>
         <Badge>{fmtHours(skill.hours_logged)} registradas</Badge>
         <Badge>{skill.tasks_done}/{skill.tasks_total} tareas</Badge>
+        <Badge>{skill.activities_done}/{skill.activities_total} actividades</Badge>
         <Badge>{skill.questions_ready}/{skill.questions_total} preguntas</Badge>
       </div>
 
@@ -86,6 +87,21 @@ function SkillModal({ skill, onClose }: { skill: Skill; onClose: () => void }) {
             0 nada · 1 leído · 2 usado con IA · 3 usado sin IA · 4 sé explicarlo · 5 sé diseñarlo
           </span>
         </div>
+      </div>
+
+      <div className="card" style={{ background: 'var(--surface-2)', marginBottom: 14 }}>
+        <div className="row between small" style={{ marginBottom: 6 }}>
+          <strong>Evidencia acumulada</strong><span>{Math.round(skill.evidence_percent)}%</span>
+        </div>
+        <ProgressBar value={skill.evidence_percent} />
+        <div className="small dim" style={{ marginTop: 7 }}>
+          Se calcula con tareas, actividades, recursos terminados y horas reales.
+        </div>
+        {skill.linked_resources.length > 0 && (
+          <div className="small muted" style={{ marginTop: 8 }}>
+            Recursos vinculados: {skill.linked_resources.map((resource) => resource.name).join(' · ')}
+          </div>
+        )}
       </div>
 
       <div className="field">
@@ -157,7 +173,7 @@ export function Skills() {
                         <Logo icon={s.icon} dark={theme === 'dark'} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontWeight: 650 }}>{s.name}</div>
-                          <div className="small dim">{fmtHours(s.hours_logged)} · {s.tasks_done}/{s.tasks_total} tareas · {Math.round(s.evidence_percent)}% evidencia</div>
+                          <div className="small dim">{fmtHours(s.hours_logged)} · {s.tasks_done}/{s.tasks_total} tareas · {s.activities_done}/{s.activities_total} actividades</div>
                         </div>
                         <Badge tone={PRIORITY_TONE[s.priority]}>{s.priority}</Badge>
                       </div>
@@ -168,6 +184,10 @@ export function Skills() {
                         <LevelBar current={s.current_level} target={s.target_level} />
                         <span className="spacer" />
                         <Badge tone={STATUS_TONE[s.status]}>{s.status}</Badge>
+                      </div>
+                      <div style={{ marginTop: 8 }}>
+                        <div className="row between small dim"><span>Evidencia</span><span>{Math.round(s.evidence_percent)}%</span></div>
+                        <ProgressBar value={s.evidence_percent} thin />
                       </div>
                     </div>
                   </Card>
