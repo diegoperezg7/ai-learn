@@ -119,6 +119,8 @@ def seed_tasks(db: Session, skills: dict[str, Skill], resources: dict[str, Resou
     for task in current_tasks:
         if task.title in renames:
             task.title = renames[task.title]
+        if task.title == "AI security review del Lab: prompt injection y mínimo privilegio":
+            task.status = "Dropped"
     db.commit()
     existing = {t.title + str(t.week) for t in db.scalars(select(Task)).unique().all()}
     for order, spec in enumerate(TASKS):
