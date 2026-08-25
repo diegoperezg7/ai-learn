@@ -187,27 +187,6 @@ def seed_questions(db: Session, skills: dict[str, Skill]) -> None:
 def seed_days(db: Session, tasks_by_title: dict[str, Task], resources: dict[str, Resource]) -> None:
     """Lay every week's sessions on real calendar days."""
     if db.scalar(select(DayPlan.id).limit(1)):
-        # Existing installations already have day plans, so the normal seed path
-        # intentionally skips inserts. Keep their copy in sync when a session is
-        # renamed or its scope is clarified in the roadmap.
-        updates = {
-            "La matemática del embedding, en papel": (
-                "Fundamentos del embedding: geometría y normalización",
-                "Vector denso, dimensiones, magnitud y producto escalar. Deriva la similitud angular a mano, compárala con distancia euclídea y explica por qué la normalización cambia la geometría del ranking.",
-            ),
-            "Cosine similarity a mano · parte 1": (
-                "Embedding lab: ranking Top-K desde cero",
-                "10 textos → embeddings → implementa la métrica angular en numpy puro (sin librerías de similitud) → ranking Top-K. Repite con vectores normalizados y anota qué cambia.",
-            ),
-            "Cosine similarity a mano · parte 2 con pgvector": (
-                "Embedding lab: validar el ranking con pgvector",
-                "Reproduce el mismo ranking con pgvector. Compara métrica, resultados y tiempos; explica cuándo la distancia euclídea coincide con la angular y cuándo no. Este es el entregable que cierra la skill de embeddings.",
-            ),
-        }
-        for plan in db.scalars(select(DayPlan)).unique().all():
-            if plan.title in updates:
-                plan.title, plan.scope = updates[plan.title]
-        db.commit()
         return
 
     for label, number, start, _end, _phase in WEEKS:
