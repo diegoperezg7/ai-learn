@@ -132,24 +132,12 @@ def seed_tasks(db: Session, skills: dict[str, Skill], resources: dict[str, Resou
         "Azure networking: red, DNS, ingress y secretos": "Diagrama del tráfico del Lab y matriz de responsabilidades: red, DNS, ingress, identidad, secretos y observabilidad.",
         "API contract del Lab: versionado, errores y paginación": "OpenAPI revisada y una API v1 documentada: errores consistentes, paginación, versionado e idempotencia.",
     }
-    task_resources = {
-        "Fundamentos de embeddings: vectores, geometría y normalización": ["Google ML Crash Course — Embeddings"],
-        "Embedding lab: ranking Top-K desde cero": ["Google ML Crash Course — Embeddings"],
-        "Tests del Lab con pytest": ["pytest — Get Started"],
-        "Dockerfile multi-stage del Lab escrito desde cero": ["Docker Get Started"],
-        "Azure networking: red, DNS, ingress y secretos": ["Fundamentals of computer networking", "Azure Networking Fundamentals"],
-        "Infra reproducible: IaC, red y secretos": ["Terraform Tutorials", "Azure Networking Fundamentals"],
-        "SRE del Lab: SLO, alertas e incidente simulado": ["The Site Reliability Workbook"],
-        "API contract del Lab: versionado, errores y paginación": ["OpenAPI Specification"],
-    }
     for task in current_tasks:
         key = f"{task.title}|{task.week}"
         if key in renames:
             task.title = renames[key]
             task.skills = [skills[s] for s in replacement_skills[task.title] if s in skills]
             task.deliverable = replacement_deliverables[task.title]
-        if task.title in task_resources:
-            task.resources = [resources[r] for r in task_resources[task.title] if r in resources]
         elif task.title in renames:
             task.title = renames[task.title]
         if task.title == "AI security review del Lab: prompt injection y mínimo privilegio":
