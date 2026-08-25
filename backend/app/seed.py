@@ -115,9 +115,30 @@ def seed_tasks(db: Session, skills: dict[str, Skill], resources: dict[str, Resou
             "Fundamentos de embeddings: vectores, geometría y normalización",
         "EJERCICIO CLAVE: cosine similarity y Top-K a mano, contrastado con pgvector":
             "Embedding lab: ranking Top-K desde cero",
+        "Exercism Python — 5 ejercicios sin IA|7":
+            "Arquitectura de agentes: workflow vs agent",
+        "Leer el temario oficial de AI-200 como mapa de huecos|9":
+            "Azure networking: red, DNS, ingress y secretos",
+        "V5 — Comparativa Modular Monolith vs Microservice documentada|11":
+            "API contract del Lab: versionado, errores y paginación",
+    }
+    replacement_skills = {
+        "Arquitectura de agentes: workflow vs agent": ["architecture", "langgraph"],
+        "Azure networking: red, DNS, ingress y secretos": ["azure", "infrastructure-sre"],
+        "API contract del Lab: versionado, errores y paginación": ["api-design", "software-design"],
+    }
+    replacement_deliverables = {
+        "Arquitectura de agentes: workflow vs agent": "Decidir cuándo el Lab debe usar workflow determinista o agente, documentarlo en un ADR corto y justificar coste, control, latencia y observabilidad.",
+        "Azure networking: red, DNS, ingress y secretos": "Diagrama del tráfico del Lab y matriz de responsabilidades: red, DNS, ingress, identidad, secretos y observabilidad.",
+        "API contract del Lab: versionado, errores y paginación": "OpenAPI revisada y una API v1 documentada: errores consistentes, paginación, versionado e idempotencia.",
     }
     for task in current_tasks:
-        if task.title in renames:
+        key = f"{task.title}|{task.week}"
+        if key in renames:
+            task.title = renames[key]
+            task.skills = [skills[s] for s in replacement_skills[task.title] if s in skills]
+            task.deliverable = replacement_deliverables[task.title]
+        elif task.title in renames:
             task.title = renames[task.title]
         if task.title == "AI security review del Lab: prompt injection y mínimo privilegio":
             task.status = "Dropped"
