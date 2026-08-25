@@ -28,9 +28,9 @@ SKILLS: list[dict] = [
     {
         "slug": "embeddings", "name": "Embeddings & Vector Math", "category": "AI Engineering", "priority": "Critical",
         "current_level": 2, "target_level": 5, "icon": "lu:vector-square", "color": "#06b6d4",
-        "description": "Que es realmente un vector denso, que representan sus dimensiones, y la matematica minima para razonar sobre similitud: magnitud, producto escalar, coseno y normalizacion.",
-        "why_it_matters": "cos(A,B) = (A·B)/(||A||·||B||) es la formula que mas veces vas a tener que explicar en tu carrera. Hay que poder derivarla, no recitarla.",
-        "completion_criteria": "Implementar cosine similarity a mano en numpy puro, hacer ranking Top-K y contrastarlo con pgvector.",
+        "description": "Que es realmente un vector denso, que representan sus dimensiones, y la geometria minima para razonar sobre proximidad: magnitud, producto escalar, similitud angular, distancia euclidea y normalizacion.",
+        "why_it_matters": "Un embedding no es magia: es geometria en un espacio de muchas dimensiones. Entender magnitud, angulo y normalizacion permite elegir la metrica y detectar rankings enganosos.",
+        "completion_criteria": "Implementar el ranking angular a mano en numpy puro, comparar vectores normalizados y sin normalizar, y contrastarlo con pgvector.",
     },
     {
         "slug": "retrieval", "name": "Retrieval & Reranking", "category": "AI Engineering", "priority": "Critical",
@@ -213,6 +213,20 @@ SKILLS: list[dict] = [
         "description": "JSX/TSX, componentes, props, estado, hooks, useState, useEffect, formularios, llamadas a API y routing.",
         "why_it_matters": "Lo justo para ponerle cara a tus backends. Prioridad minima: aprender construyendo, no con cursos.",
         "completion_criteria": "Construir un frontend minimo para el Lab sin curso: components, props, state, hooks, forms, API calls.",
+    },
+    {
+        "slug": "api-design", "name": "API Design", "category": "Software Engineering", "priority": "High",
+        "current_level": 1, "target_level": 4, "icon": "lu:route", "color": "#14b8a6",
+        "description": "Contratos, errores, paginación, versionado, compatibilidad e idempotencia para APIs que otros puedan usar y mantener.",
+        "why_it_matters": "FastAPI permite levantar endpoints rápido; diseñar una API estable exige pensar en clientes, evolución y fallos antes de escribir código.",
+        "completion_criteria": "Diseñar y documentar una API versionada con errores consistentes, paginación, autenticación e idempotencia.",
+    },
+    {
+        "slug": "infrastructure-sre", "name": "Infrastructure & SRE", "category": "Cloud / Infra", "priority": "High",
+        "current_level": 1, "target_level": 4, "icon": "lu:server-cog", "color": "#64748b",
+        "description": "Redes, DNS, IaC, SLIs/SLOs, alertas, incidentes, backups y recuperación ante desastres: la capa entre desplegar y operar bien.",
+        "why_it_matters": "Un sistema de IA en producción no termina cuando responde en una URL: debe ser observable, recuperable y razonable de operar.",
+        "completion_criteria": "Levantar infraestructura reproduciblemente, definir SLIs/SLOs, simular un incidente y documentar backup, rollback y recuperación.",
     },
 ]
 

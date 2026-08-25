@@ -64,6 +64,11 @@ def seed_skills(db: Session) -> dict[str, Skill]:
             skill = Skill(**spec, sort_order=order)
             db.add(skill)
             existing[spec["slug"]] = skill
+        elif spec["slug"] == "embeddings":
+            # This skill copy was refined after the embedding-math review.
+            # Preserve the learner's level/status/evidence while refreshing the curriculum text.
+            for field in ("description", "why_it_matters", "completion_criteria"):
+                setattr(skill, field, spec[field])
     db.commit()
     return {s.slug: s for s in db.scalars(select(Skill)).unique().all()}
 
@@ -102,6 +107,19 @@ def _task_dates(spec: dict) -> tuple[date | None, date | None]:
 
 
 def seed_tasks(db: Session, skills: dict[str, Skill], resources: dict[str, Resource]) -> None:
+    current_tasks = db.scalars(select(Task)).unique().all()
+    # Keep an already-seeded production database aligned with the roadmap copy.
+    # The task ids remain stable, so existing progress and day-plan references survive.
+    renames = {
+        "Matematicas del embedding: vector, magnitude, dot product, cosine":
+            "Fundamentos de embeddings: vectores, geometría y normalización",
+        "EJERCICIO CLAVE: cosine similarity y Top-K a mano, contrastado con pgvector":
+            "Embedding lab: ranking Top-K desde cero",
+    }
+    for task in current_tasks:
+        if task.title in renames:
+            task.title = renames[task.title]
+    db.commit()
     existing = {t.title + str(t.week) for t in db.scalars(select(Task)).unique().all()}
     for order, spec in enumerate(TASKS):
         key = spec["title"] + str(spec.get("week"))
