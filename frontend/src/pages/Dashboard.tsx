@@ -50,6 +50,14 @@ export function Dashboard() {
   const weekTotalMin = weekPlan.reduce((a, p) => a + p.minutes, 0)
   const allTodayDone = d.today_plan.length > 0 && todayDone === d.today_plan.length
   const nextOptional = restOfWeek.find((p) => !p.done)
+  const recommended = d.next_recommendation
+  const stateLabel = {
+    overdue: 'Pendiente prioritaria',
+    today: 'Tarea de hoy',
+    ahead: 'Vas al día · opcional para avanzar',
+    covered: 'Semana cubierta',
+    break: 'Break · sprint en pausa',
+  }[d.today_state]
 
   const rawDay = new Date(`${d.today}T00:00:00`).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-GB', {
     weekday: 'long', day: 'numeric', month: 'long',
@@ -63,7 +71,8 @@ export function Dashboard() {
       <div className="page-head">
         <h2>{dayLabel}</h2>
         <p>
-          {d.current_week_label} · {fmtHours(weekDoneMin / 60)} de {fmtHours(weekTotalMin / 60)} esta semana
+          {d.current_week_label} · {fmtHours(weekDoneMin / 60)} de {fmtHours(weekTotalMin / 60)} esta semana · {stateLabel}
+          {d.days_ahead > 0 && ` · ${d.days_ahead} día(s) adelantado(s)`}
         </p>
       </div>
 
@@ -79,10 +88,22 @@ export function Dashboard() {
         {d.today_plan.length === 0 ? (
           <div className="empty">
             <Coffee size={26} style={{ marginBottom: 8, opacity: 0.5 }} />
-            <div><strong>Día libre.</strong></div>
+            <div><strong>{d.today_state === 'break' ? 'Break.' : d.today_state === 'covered' ? 'Semana cubierta.' : 'Sin tarea asignada hoy.'}</strong></div>
             <div className="small" style={{ marginTop: 4 }}>
-              El plan exige descansar. Si tienes ganas, adelanta algo de mañana desde el Roadmap.
+              {d.today_state === 'break'
+                ? 'El sprint está en pausa. No hay recomendaciones durante este periodo.'
+                : d.today_state === 'covered'
+                  ? 'Has cumplido el objetivo semanal. Puedes descansar o avanzar voluntariamente.'
+                  : recommended
+                    ? 'Vas al día. Si quieres seguir avanzando, esta es la siguiente tarea recomendada.'
+                    : 'No hay una sesión disponible en este momento.'}
             </div>
+            {recommended && (
+              <div className="row wrap" style={{ justifyContent: 'center', gap: 8, marginTop: 10 }}>
+                <Badge tone="accent">{recommended.title} · {recommended.minutes} min</Badge>
+                <Link to="/roadmap" className="btn btn-sm btn-primary">Ver recomendación <ArrowRight size={13} /></Link>
+              </div>
+            )}
           </div>
         ) : (
           <>

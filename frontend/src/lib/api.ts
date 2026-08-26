@@ -203,6 +203,10 @@ export interface Dashboard {
   estimated_completion_date: string | null
   today_extra_minutes: number
   today_extra_titles: string[]
+  today_state: 'overdue' | 'today' | 'ahead' | 'covered' | 'break'
+  next_recommendation: DayPlan | null
+  days_ahead: number
+  week_core_minutes: number
   current_week: number | null
   current_week_label: string
   phase: string

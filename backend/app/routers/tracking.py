@@ -240,7 +240,6 @@ def mark_all_read(db: Session = Depends(get_db)) -> None:
 @router.get("/dashboard", response_model=DashboardOut)
 def dashboard(db: Session = Depends(get_db)) -> DashboardOut:
     ref = progress.today()
-    progress.rollover_overdue_plans(db, ref)
     tasks = db.scalars(select(Task)).unique().all()
     real_tasks = [t for t in tasks if t.phase != "Break"]
 
@@ -340,6 +339,39 @@ def dashboard(db: Session = Depends(get_db)) -> DashboardOut:
     today_extra_titles = sorted({s.notes for s in today_sessions if s.day != ref and s.notes in future_activity_titles})
     today_extra_minutes = sum(s.minutes for s in today_sessions if s.day != ref and s.notes in future_activity_titles)
 
+    # Planned dates are immutable. The daily recommendation is a derived view
+    # over them: overdue work first, then today's work, then the next available
+    # future session. Break periods never produce recommendations.
+    all_plans = db.scalars(select(DayPlan).order_by(DayPlan.day, DayPlan.slot, DayPlan.id)).unique().all()
+    break_ranges = [
+        (review.start_date, review.end_date)
+        for review in db.scalars(select(WeeklyReview)).all()
+        if review.phase == "Break" and review.start_date and review.end_date
+    ]
+    def in_break(day: date) -> bool:
+        return any(start <= day <= end for start, end in break_ranges)
+
+    pending = [plan for plan in all_plans if not plan.done and not in_break(plan.day)]
+    overdue = [plan for plan in pending if plan.day < ref]
+    today_pending = [plan for plan in pending if plan.day == ref]
+    future_pending = [plan for plan in pending if plan.day > ref]
+    if in_break(ref):
+        today_state = "break"
+        recommendation = None
+    elif overdue:
+        today_state = "overdue"
+        recommendation = overdue[0]
+    elif today_pending:
+        today_state = "today"
+        recommendation = today_pending[0]
+    elif hours_week >= settings.weekly_target_hours:
+        today_state = "covered"
+        recommendation = None
+    else:
+        today_state = "ahead"
+        recommendation = future_pending[0] if future_pending else None
+    completed_future = {plan.day for plan in all_plans if plan.day > ref and plan.done}
+
     return DashboardOut(
         today=ref,
         sprint_start=settings.sprint_start,
@@ -375,4 +407,8 @@ def dashboard(db: Session = Depends(get_db)) -> DashboardOut:
         today_extra_minutes=today_extra_minutes,
         today_extra_titles=today_extra_titles,
         questions_due=int(questions_due),
+        today_state=today_state,
+        next_recommendation=DayPlanOut.model_validate(recommendation) if recommendation else None,
+        days_ahead=len(completed_future),
+        week_core_minutes=sum(plan.minutes for plan in all_plans if plan.week == current_week and not in_break(plan.day)),
     )

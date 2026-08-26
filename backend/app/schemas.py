@@ -404,3 +404,7 @@ class DashboardOut(BaseModel):
     today_minutes_done: int = 0
     today_minutes_planned: int = 0
     questions_due: int = 0
+    today_state: str = "today"  # overdue | today | ahead | covered | break
+    next_recommendation: DayPlanOut | None = None
+    days_ahead: int = 0
+    week_core_minutes: int = 0
