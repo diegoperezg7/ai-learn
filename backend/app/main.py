@@ -55,6 +55,25 @@ async def lifespan(_app: FastAPI):
                 ("Lección 161 · Agility and Monolithic Architectures", 30, "https://www.developertoarchitect.com/lessons/"),
                 ("Lección 159 · Modular Monolith Architecture", 30, "https://www.developertoarchitect.com/lessons/"),
             ],
+            "Richards · lección 162 + tu tabla": [
+                ("Lección 162 · Microservices Architecture", 25, "https://www.developertoarchitect.com/lessons/"),
+                ("Tabla de trade-offs: cuándo elegir cada estilo", 20, "https://www.developertoarchitect.com/lessons/"),
+            ],
+            "Richards · lección 131 + los 4 estilos restantes": [
+                ("Lección 131 · Microservices vs Event-Driven", 25, "https://www.developertoarchitect.com/lessons/"),
+                ("Layered, Clean, Hexagonal y Event-Driven", 35, "https://www.developertoarchitect.com/lessons/"),
+            ],
+            "Top-K vs Top-P y KV cache": [
+                ("Medir TTFT e inter-token latency", 20, ""),
+                ("Explicar conceptualmente KV cache", 20, ""),
+                ("Separar observación empírica de causalidad", 20, ""),
+            ],
+            "Quantization y VRAM de tus modelos": [
+                ("Calcular 7B × bits por parámetro", 25, ""),
+                ("Distinguir weights, KV cache y runtime overhead", 25, ""),
+                ("Comparar con memoria observada en Ollama", 25, ""),
+                ("Explicar por qué no coinciden exactamente", 45, ""),
+            ],
         }
         for title, specs in activity_sets.items():
             plan = db.query(DayPlan).filter(DayPlan.title == title).first()
@@ -63,6 +82,15 @@ async def lifespan(_app: FastAPI):
                     DayPlanActivity(title=name, minutes=minutes, url=url, sort_order=index)
                     for index, (name, minutes, url) in enumerate(specs)
                 ]
+        scope_updates = {
+            "Top-K vs Top-P y KV cache": "Compara Top-K y Top-P en Ollama. Mide Time To First Token e inter-token latency. Explica conceptualmente cómo KV cache evita recalcular K/V anteriores y separa la observación empírica de la explicación causal.",
+            "Quantization y VRAM de tus modelos": "Distingue model weights, RAM/VRAM residente, KV cache, context length y runtime overhead. Calcula 7B × bits por parámetro y contrástalo con la memoria realmente observada en Ollama; explica por qué no coincide exactamente.",
+            "Richards · lección 131 + los 4 estilos restantes": "Lección 131 · Microservices vs Event-Driven Architecture. Distingue distribución/deployment boundaries (monolith vs microservices) de organización interna y dependencias (layered, clean, hexagonal, event-driven), y resume el trade-off de cada una.",
+        }
+        for title, scope in scope_updates.items():
+            plan = db.query(DayPlan).filter(DayPlan.title == title).first()
+            if plan and not plan.done:
+                plan.scope = scope
         db.commit()
         notifier.refresh(db)
     log.info("AI Mastery Hub listo. Sprint %s -> %s", settings.sprint_start, settings.core_deadline)
