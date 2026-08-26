@@ -214,6 +214,13 @@ SKILLS: list[dict] = [
         "why_it_matters": "Lo justo para ponerle cara a tus backends. Prioridad minima: aprender construyendo, no con cursos.",
         "completion_criteria": "Construir un frontend minimo para el Lab sin curso: components, props, state, hooks, forms, API calls.",
     },
+    {
+        "slug": "technology-map", "name": "Technology & Framework Map", "category": "AI Engineering", "priority": "High",
+        "current_level": 0, "target_level": 3, "icon": "lu:map", "color": "#06b6d4",
+        "description": "Criterio para distinguir lenguajes, runtimes, frameworks, librerías, bases de datos, caches, ORM, APIs, protocolos y contenedores, y elegirlos dentro de un AI system.",
+        "why_it_matters": "Un AI Engineer completo necesita saber cuándo elegir una tecnología y cuándo no, sin convertirse en especialista de todas.",
+        "completion_criteria": "Explicar las capas lenguaje/runtime/framework/library y defender decisiones como FastAPI vs Django, React vs Next.js y PostgreSQL vs Redis.",
+    },
 ]
 
 RESOURCES: list[dict] = [
@@ -236,7 +243,9 @@ RESOURCES: list[dict] = [
     {"name": "Neural Networks: Zero to Hero", "provider": "Andrej Karpathy", "kind": "Video Series", "url": "https://karpathy.ai/zero-to-hero.html", "price": "Free", "estimated_hours": 14, "priority": "High", "icon": "si:youtube", "skills": ["neural-networks", "transformers", "pytorch"], "verdict": "Diciembre. Backprop, PyTorch y un GPT desde cero en el mismo hilo. Tres skills de una y todo codigo."},
     {"name": "The Illustrated Transformer", "provider": "Jay Alammar", "kind": "Reference", "url": "https://jalammar.github.io/illustrated-transformer/", "price": "Free", "estimated_hours": 2, "priority": "High", "icon": "lu:layers-3", "skills": ["transformers"], "verdict": "Diciembre. 2 h para el modelo mental de Q/K/V antes de tocar codigo."},
     {"name": "Hugging Face — LLM Course", "provider": "Hugging Face", "kind": "Course", "url": "https://huggingface.co/learn/llm-course", "price": "Free", "estimated_hours": 10, "priority": "Medium", "icon": "si:huggingface", "skills": ["huggingface", "fine-tuning"], "verdict": "Diciembre. Transformers, tokenizers, pipelines, datasets y fine-tuning con modelos reales."},
-    {"name": "PyTorch — Learn the Basics", "provider": "Official Docs", "kind": "Docs", "url": "https://pytorch.org/tutorials/beginner/basics/intro.html", "price": "Free", "estimated_hours": 6, "priority": "Medium", "icon": "si:pytorch", "skills": ["pytorch"], "verdict": "Diciembre. Tensors, autograd, training loop. Complemento practico a Karpathy."},
+    {"name": "PyTorch — Learn the Basics", "provider": "Official Docs", "kind": "Docs", "url": "https://docs.pytorch.org/tutorials/beginner/basics/", "price": "Free", "estimated_hours": 6, "priority": "Medium", "icon": "si:pytorch", "skills": ["pytorch"], "verdict": "Diciembre. Tensors, autograd, training loop. Complemento practico a Karpathy."},
+    {"name": "TypeScript Handbook", "provider": "TypeScript", "kind": "Docs", "url": "https://www.typescriptlang.org/docs/handbook/", "price": "Free", "estimated_hours": 3, "priority": "High", "icon": "si:typescript", "skills": ["typescript", "technology-map"], "verdict": "Ruta selectiva: types, interfaces, unions, narrowing, generics, async y modules aplicados al código React real."},
+    {"name": "Technology & Framework Map", "provider": "Official Docs", "kind": "Reference", "url": "https://developer.mozilla.org/en-US/docs/Learn", "price": "Free", "estimated_hours": 1, "priority": "High", "icon": "lu:map", "skills": ["technology-map"], "verdict": "Mapa de criterio, no enciclopedia: lenguaje, runtime, framework, library, datos, API, protocolo y container."},
     {"name": "Learn TypeScript (Scrimba)", "provider": "Coursera", "kind": "Course", "url": "https://www.coursera.org/learn/learn-typescript", "price": "Free audit / paid cert", "estimated_hours": 5, "priority": "Optional", "rating": 4.6, "icon": "si:typescript", "skills": ["typescript"], "verdict": "RELLENO. 4.6/5, 5 h reales, free audit. Solo si sobra hueco; nunca antes que Python/RAG/Arquitectura."},
     {"name": "react.dev — Learn React", "provider": "Official Docs", "kind": "Docs", "url": "https://react.dev/learn", "price": "Free", "estimated_hours": 6, "priority": "Optional", "icon": "si:react", "skills": ["react"], "verdict": "SUSTITUYE a React Basics de Meta. 6 h en vez de 28 para el mismo objetivo."},
     {"name": "React Basics — Meta", "provider": "Coursera", "kind": "Course", "url": "https://www.coursera.org/learn/react-basics", "price": "Free audit / paid cert", "estimated_hours": 28, "priority": "Optional", "status": "Dropped", "rating": 4.7, "icon": "si:coursera", "skills": ["react"], "verdict": "DESCARTADO. 4.7/5 y 2.601 resenas, pero 28 h para la skill de menor prioridad. Registrado para dejar constancia de la decision."},

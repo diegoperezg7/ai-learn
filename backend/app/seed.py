@@ -72,6 +72,8 @@ def seed_resources(db: Session, skills: dict[str, Skill]) -> dict[str, Resource]
     existing = {r.name: r for r in db.scalars(select(Resource)).unique().all()}
     for spec in RESOURCES:
         if spec["name"] in existing:
+            # Correct canonical links without touching user status, notes or history.
+            existing[spec["name"]].url = spec.get("url", existing[spec["name"]].url)
             continue
         data = {k: v for k, v in spec.items() if k != "skills"}
         data.setdefault("free_access", data.get("price", "Free") != "Paid")
