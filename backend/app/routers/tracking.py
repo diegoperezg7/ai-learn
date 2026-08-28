@@ -366,7 +366,9 @@ def dashboard(db: Session = Depends(get_db)) -> DashboardOut:
         recommendation = today_pending[0]
     elif hours_week >= settings.weekly_target_hours:
         today_state = "covered"
-        recommendation = None
+        # Keep the baseline at six hours, but offer one voluntary next step so
+        # an ahead-of-schedule learner can keep moving without flooding Today.
+        recommendation = future_pending[0] if future_pending else None
     else:
         today_state = "ahead"
         recommendation = future_pending[0] if future_pending else None
