@@ -107,6 +107,13 @@ export function Roadmap() {
 
   const sprintTasks = tasks.filter((x) => x.phase === 'Sprint 12w')
   const sprintDone = sprintTasks.filter((x) => DONE.has(x.status)).length
+  const today = new Date().toISOString().slice(0, 10)
+  const overduePlan = useMemo(
+    () => days
+      .filter((plan) => plan.day < today && !plan.done && plan.task_id != null)
+      .sort((a, b) => a.day.localeCompare(b.day) || a.slot - b.slot)[0] ?? null,
+    [days, today],
+  )
 
   return (
     <>
@@ -118,6 +125,21 @@ export function Roadmap() {
       <Card style={{ marginBottom: 14 }}>
         <ProgressBar value={sprintTasks.length ? (sprintDone / sprintTasks.length) * 100 : 0} />
       </Card>
+
+      {overduePlan && (
+        <Card style={{ marginBottom: 14, borderColor: 'var(--danger)', background: 'var(--danger-soft)' }}>
+          <div className="row wrap between" style={{ gap: 10 }}>
+            <div style={{ minWidth: 0 }}>
+              <div className="small" style={{ color: 'var(--danger)', fontWeight: 700 }}>Pendiente prioritaria para hoy</div>
+              <strong>{overduePlan.title}</strong>
+              <div className="small dim" style={{ marginTop: 3 }}>
+                Planificada para {formatDayLabel(overduePlan.day, lang)} · {overduePlan.minutes} min. La fecha original se mantiene en el calendario.
+              </div>
+            </div>
+            <div style={{ flexShrink: 0 }}><DaySession plan={overduePlan} /></div>
+          </div>
+        </Card>
+      )}
 
       <div className="tabs">
         {TABS.map((x) => (
