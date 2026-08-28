@@ -207,7 +207,9 @@ def repair_seeded_plan_dates(db: Session) -> None:
     day_counts: dict[date, int] = {}
     for plan in plans:
         day_counts[plan.day] = day_counts.get(plan.day, 0) + 1
-    if not plans or max(day_counts.values(), default=0) < 6 or len({p.week for p in plans}) < 2:
+    # The earlier buggy compactor put every unfinished week on one date. Only
+    # repair that unmistakable shape; normal adaptive schedules are untouched.
+    if not plans or len(day_counts) != 1 or len({p.week for p in plans}) < 2:
         return
     by_week_slot = {(plan.week, plan.slot): plan for plan in plans if plan.week is not None}
     for _label, number, start, _end, _phase in WEEKS:
