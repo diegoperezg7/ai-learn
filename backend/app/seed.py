@@ -204,12 +204,9 @@ def seed_days(db: Session, tasks_by_title: dict[str, Task], resources: dict[str,
 def repair_seeded_plan_dates(db: Session) -> None:
     """Restore the canonical calendar for unfinished seeded sessions only."""
     plans = db.scalars(select(DayPlan).where(DayPlan.done.is_(False))).all()
-    day_counts: dict[date, int] = {}
-    for plan in plans:
-        day_counts[plan.day] = day_counts.get(plan.day, 0) + 1
-    # The earlier buggy compactor put every unfinished week on one date. Only
+    # The earlier buggy compactor put later-week sessions on today's date. Only
     # repair that unmistakable shape; normal adaptive schedules are untouched.
-    if not plans or len(day_counts) != 1 or len({p.week for p in plans}) < 2:
+    if not plans or not any(plan.day == date.today() and (plan.week or 0) >= 3 for plan in plans):
         return
     by_week_slot = {(plan.week, plan.slot): plan for plan in plans if plan.week is not None}
     for _label, number, start, _end, _phase in WEEKS:
