@@ -29,6 +29,34 @@ from ..services import notifier, progress
 router = APIRouter(tags=["tracking"])
 
 
+def _compact_incomplete_plan(db: Session, reference: date) -> None:
+    """Fill the next available day with unfinished future sessions.
+
+    Completed rows are never touched; only incomplete sessions are compacted so
+    early progress does not leave artificial empty days in the Roadmap.
+    """
+    today_plans = db.scalars(
+        select(DayPlan).where(DayPlan.day == reference).order_by(DayPlan.slot, DayPlan.id)
+    ).unique().all()
+    if any(not plan.done for plan in today_plans):
+        cursor = reference + timedelta(days=1)
+    else:
+        cursor = reference
+    future = db.scalars(
+        select(DayPlan)
+        .where(DayPlan.day > reference, DayPlan.done.is_(False))
+        .order_by(DayPlan.day, DayPlan.slot, DayPlan.id)
+    ).unique().all()
+    next_slot = max((plan.slot for plan in today_plans if plan.day == cursor), default=-1) + 1
+    for plan in future:
+        if plan.day != cursor:
+            plan.day = cursor
+        plan.slot = next_slot
+        next_slot += 1
+    if future:
+        db.flush()
+
+
 # ------------------------------------------------------------------ day plan
 
 
@@ -75,6 +103,7 @@ def complete_day(plan_id: int, minutes: int | None = None, db: Session = Depends
                 notes=plan.title,
             )
         )
+        _compact_incomplete_plan(db, progress.today())
         db.commit()
         db.refresh(plan)
     return plan
@@ -103,6 +132,8 @@ def toggle_activity(plan_id: int, activity_id: int, done: bool, db: Session = De
     activity.done = done
     plan.started = True
     plan.done = bool(plan.activities) and all(a.done for a in plan.activities)
+    if plan.done:
+        _compact_incomplete_plan(db, progress.today())
     db.commit(); db.refresh(plan)
     return plan
 
