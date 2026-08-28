@@ -169,6 +169,12 @@ export function Roadmap() {
             const hours = g.tasks.reduce((a, x) => a + x.estimated_hours, 0)
             const isOpen = collapsed[g.key] !== true
             const allDone = done === g.tasks.length && g.tasks.length > 0
+            const adaptiveDays = days
+              .filter((plan) => plan.week === g.order && !plan.done)
+              .map((plan) => plan.day)
+              .sort()
+            const displayStart = adaptiveDays[0] ?? meta?.start
+            const displayEnd = adaptiveDays.at(-1) ?? meta?.end
             return (
               <Card
                 key={g.key}
@@ -188,9 +194,9 @@ export function Roadmap() {
                     </div>
                     {g.subtitle && <div className="small muted" style={{ marginTop: 1 }}>{g.subtitle}</div>}
                   </div>
-                  {meta?.start && (
+                  {displayStart && displayEnd && (
                     <span className="small dim week-dates">
-                      {fmtDate(meta.start, lang)} – {fmtDate(meta.end, lang)}
+                      {fmtDate(displayStart, lang)} – {fmtDate(displayEnd, lang)}
                     </span>
                   )}
                   <Badge>{fmtHours(hours)}</Badge>

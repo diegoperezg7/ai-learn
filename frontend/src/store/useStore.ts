@@ -136,8 +136,8 @@ export const useData = create<DataState>()((set, get) => ({
       set({ days: get().days.map((d) => (d.id === plan.id ? updated : d)) })
       get().toast(`+${plan.minutes} min · ${plan.title}`, 'success')
     }
-    const [dashboard, sessions, tasks] = await Promise.all([api.dashboard(), api.sessions(), api.tasks()])
-    set({ dashboard, sessions, tasks })
+    const [dashboard, sessions, tasks, days] = await Promise.all([api.dashboard(), api.sessions(), api.tasks(), api.days()])
+    set({ dashboard, sessions, tasks, days })
   },
 
   startDayPlan: async (plan) => {
@@ -150,7 +150,8 @@ export const useData = create<DataState>()((set, get) => ({
   toggleActivity: async (plan, activityId, done) => {
     const updated = await api.toggleActivity(plan.id, activityId, done)
     set({ days: get().days.map((d) => (d.id === plan.id ? updated : d)) })
-    await get().refreshDashboard()
+    const [dashboard, days] = await Promise.all([api.dashboard(), api.days()])
+    set({ dashboard, days })
   },
 
   setTaskStatus: async (id, status) => {

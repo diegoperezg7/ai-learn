@@ -29,33 +29,28 @@ from ..services import notifier, progress
 router = APIRouter(tags=["tracking"])
 
 
-def _compact_incomplete_plan(db: Session, reference: date) -> None:
-    """Fill the next available day with unfinished future sessions.
+def _adaptive_dates(
+    plans: list[DayPlan],
+    reference: date,
+    has_progress_today: bool,
+    break_ranges: list[tuple[date, date]],
+) -> dict[int, date]:
+    """Return effective dates without mutating the canonical roadmap."""
+    pending = sorted((p for p in plans if not p.done), key=lambda p: (p.day, p.slot, p.id))
+    if not pending:
+        return {}
+    cursor = reference if has_progress_today or pending[0].day <= reference else reference + timedelta(days=1)
 
-    Completed rows are never touched; only incomplete sessions are compacted so
-    early progress does not leave artificial empty days in the Roadmap.
-    """
-    today_plans = db.scalars(
-        select(DayPlan).where(DayPlan.day == reference).order_by(DayPlan.slot, DayPlan.id)
-    ).unique().all()
-    if any(not plan.done for plan in today_plans):
-        cursor = reference + timedelta(days=1)
-    else:
-        cursor = reference
-    future = db.scalars(
-        select(DayPlan)
-        .where(DayPlan.day > reference, DayPlan.done.is_(False))
-        .order_by(DayPlan.day, DayPlan.slot, DayPlan.id)
-    ).unique().all()
-    next_slot = max((plan.slot for plan in today_plans if plan.day == cursor), default=-1) + 1
-    for plan in future:
-        if plan.day != cursor:
-            plan.day = cursor
-        plan.slot = next_slot
-        next_slot += 1
+    def in_break(day: date) -> bool:
+        return any(start <= day <= end for start, end in break_ranges)
+
+    effective: dict[int, date] = {}
+    for plan in pending:
+        while in_break(cursor):
+            cursor += timedelta(days=1)
+        effective[plan.id] = cursor
         cursor += timedelta(days=1)
-    if future:
-        db.flush()
+    return effective
 
 
 # ------------------------------------------------------------------ day plan
@@ -66,13 +61,28 @@ def list_days(
     day: date | None = None,
     week: int | None = None,
     db: Session = Depends(get_db),
-) -> list[DayPlan]:
-    stmt = select(DayPlan).order_by(DayPlan.day, DayPlan.slot)
+) -> list[DayPlanOut]:
+    reference = progress.today()
+    plans = db.scalars(select(DayPlan).order_by(DayPlan.day, DayPlan.slot, DayPlan.id)).unique().all()
+    has_progress_today = bool(db.scalar(
+        select(func.count(StudySession.id)).where(
+            (StudySession.day == reference) | (func.date(StudySession.created_at) == reference)
+        )
+    ))
+    break_ranges = [
+        (review.start_date, review.end_date)
+        for review in db.scalars(select(WeeklyReview)).all()
+        if review.phase == "Break" and review.start_date and review.end_date
+    ]
+    effective = _adaptive_dates(plans, reference, has_progress_today, break_ranges)
+    output = [
+        DayPlanOut.model_validate(plan).model_copy(update={"day": effective.get(plan.id, plan.day)})
+        for plan in plans
+        if (week is None or plan.week == week)
+    ]
     if day is not None:
-        stmt = stmt.where(DayPlan.day == day)
-    if week is not None:
-        stmt = stmt.where(DayPlan.week == week)
-    return db.scalars(stmt).unique().all()
+        output = [plan for plan in output if plan.day == day]
+    return sorted(output, key=lambda plan: (plan.day, plan.slot, plan.id))
 
 
 @router.patch("/days/{plan_id}", response_model=DayPlanOut)
@@ -97,14 +107,13 @@ def complete_day(plan_id: int, minutes: int | None = None, db: Session = Depends
         plan.done = True
         db.add(
             StudySession(
-                day=plan.day,
+                day=progress.today(),
                 minutes=minutes or plan.minutes,
                 task_id=plan.task_id,
                 mode=plan.mode,
                 notes=plan.title,
             )
         )
-        _compact_incomplete_plan(db, progress.today())
         db.commit()
         db.refresh(plan)
     return plan
@@ -133,8 +142,6 @@ def toggle_activity(plan_id: int, activity_id: int, done: bool, db: Session = De
     activity.done = done
     plan.started = True
     plan.done = bool(plan.activities) and all(a.done for a in plan.activities)
-    if plan.done:
-        _compact_incomplete_plan(db, progress.today())
     db.commit(); db.refresh(plan)
     return plan
 
