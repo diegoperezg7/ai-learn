@@ -122,6 +122,22 @@ export function Dashboard() {
                 +{d.today_extra_minutes} min adelantados: {d.today_extra_titles.join(', ')}
               </div>
             )}
+            {recommended && (d.today_state === 'overdue' || allTodayDone) && (
+              <div className="done-next-card" style={{ borderColor: d.today_state === 'overdue' ? 'var(--danger)' : undefined }}>
+                <div>
+                  <strong>{d.today_state === 'overdue' ? 'Pendiente prioritaria' : 'Siguiente recomendación'}</strong>
+                  <div className="small dim" style={{ marginTop: 3 }}>
+                    {d.today_state === 'overdue'
+                      ? 'Has avanzado en otras actividades, pero esta tarea core anterior sigue pendiente.'
+                      : 'El objetivo de hoy está cumplido; puedes continuar con la siguiente actividad.'}
+                  </div>
+                  <div className="small" style={{ marginTop: 7 }}>
+                    <strong>{recommended.title}</strong> · {recommended.minutes} min
+                  </div>
+                </div>
+                <Link to="/roadmap" className="btn btn-sm btn-primary">Abrir tarea <ArrowRight size={13} /></Link>
+              </div>
+            )}
             {allTodayDone && (
               <>
                 <p className="small" style={{ color: 'var(--success)', marginBottom: 8, marginTop: 8 }}>
