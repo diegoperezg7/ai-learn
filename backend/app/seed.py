@@ -208,7 +208,7 @@ def repair_seeded_plan_dates(db: Session) -> None:
     # repair that unmistakable shape; normal adaptive schedules are untouched.
     if not plans or not any(plan.day == date.today() and (plan.week or 0) >= 3 for plan in plans):
         return
-    by_week_slot = {(plan.week, plan.slot): plan for plan in plans if plan.week is not None}
+    by_week_title = {(plan.week, plan.title): plan for plan in plans if plan.week is not None}
     for _label, number, start, _end, _phase in WEEKS:
         if number is None or number not in WEEK_PLANS:
             continue
@@ -216,10 +216,11 @@ def repair_seeded_plan_dates(db: Session) -> None:
         offset, minutes, mode, title, scope = REVIEW_SESSION
         rows.append((offset, minutes, mode, f"{title} S{number}", scope, f"Weekly Review S{number}", ""))
         week_start = date.fromisoformat(start)
-        for slot, (day_offset, *_rest) in enumerate(rows):
-            plan = by_week_slot.get((number, slot))
+        for slot, (day_offset, _mins, _mode, session_title, *_rest) in enumerate(rows):
+            plan = by_week_title.get((number, session_title))
             if plan:
                 plan.day = week_start + timedelta(days=day_offset)
+                plan.slot = slot
     db.flush()
 
 
