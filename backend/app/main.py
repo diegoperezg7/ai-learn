@@ -91,6 +91,9 @@ async def lifespan(_app: FastAPI):
             plan = db.query(DayPlan).filter(DayPlan.title == title).first()
             if plan and not plan.done:
                 plan.scope = scope
+        # Apply adaptive compaction to progress made before this behaviour was
+        # deployed, so the next activity is available immediately after restart.
+        tracking._compact_incomplete_plan(db, tracking.progress.today())
         db.commit()
         notifier.refresh(db)
     log.info("AI Mastery Hub listo. Sprint %s -> %s", settings.sprint_start, settings.core_deadline)
