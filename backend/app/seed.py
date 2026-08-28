@@ -201,6 +201,29 @@ def seed_days(db: Session, tasks_by_title: dict[str, Task], resources: dict[str,
     db.commit()
 
 
+def repair_seeded_plan_dates(db: Session) -> None:
+    """Restore the canonical calendar for unfinished seeded sessions only."""
+    plans = db.scalars(select(DayPlan).where(DayPlan.done.is_(False))).all()
+    day_counts: dict[date, int] = {}
+    for plan in plans:
+        day_counts[plan.day] = day_counts.get(plan.day, 0) + 1
+    if not plans or max(day_counts.values(), default=0) < 6 or len({p.week for p in plans}) < 2:
+        return
+    by_week_slot = {(plan.week, plan.slot): plan for plan in plans if plan.week is not None}
+    for _label, number, start, _end, _phase in WEEKS:
+        if number is None or number not in WEEK_PLANS:
+            continue
+        rows = list(WEEK_PLANS[number])
+        offset, minutes, mode, title, scope = REVIEW_SESSION
+        rows.append((offset, minutes, mode, f"{title} S{number}", scope, f"Weekly Review S{number}", ""))
+        week_start = date.fromisoformat(start)
+        for slot, (day_offset, *_rest) in enumerate(rows):
+            plan = by_week_slot.get((number, slot))
+            if plan:
+                plan.day = week_start + timedelta(days=day_offset)
+    db.flush()
+
+
 def seed_cv(db: Session) -> None:
     if db.scalar(select(CVDocument).limit(1)):
         return

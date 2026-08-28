@@ -53,6 +53,7 @@ def _compact_incomplete_plan(db: Session, reference: date) -> None:
             plan.day = cursor
         plan.slot = next_slot
         next_slot += 1
+        cursor += timedelta(days=1)
     if future:
         db.flush()
 
