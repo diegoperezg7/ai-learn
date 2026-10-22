@@ -7,7 +7,7 @@ import {
   ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts'
 
-import { usePrefs } from '../store/useStore'
+import { usePrefs, useT } from '../store/useStore'
 
 /**
  * Recharts needs resolved colour values, not `var(--accent)`, so lee los tokens
@@ -69,13 +69,14 @@ export interface WeekPoint { label: string; target: number; actual: number }
 export function WeeklyHoursChart({ data, height = 220 }: { data: WeekPoint[]; height?: number }) {
   const c = useChartTheme()
   const tip = useTooltipStyle()
+  const t = useT()
   return (
     <ResponsiveContainer width="100%" height={height}>
       <ComposedChart data={data} margin={{ top: 6, right: 6, left: -22, bottom: 0 }}>
         <CartesianGrid strokeDasharray="3 3" stroke={c.grid} vertical={false} />
         <XAxis dataKey="label" tick={{ ...AXIS, fill: c.axis }} axisLine={false} tickLine={false} />
         <YAxis tick={{ ...AXIS, fill: c.axis }} axisLine={false} tickLine={false} unit="h" />
-        <Tooltip {...tip} formatter={(v, n) => [`${num(v)} h`, n === 'actual' ? 'Real' : 'Objetivo']} />
+        <Tooltip {...tip} formatter={(v, n) => [`${num(v)} h`, n === 'actual' ? t('chart.actual') : t('chart.target')]} />
         <Bar dataKey="actual" name="actual" radius={[8, 8, 8, 8]} maxBarSize={26}>
           {data.map((d, i) => (
             <Cell key={i} fill={d.actual >= d.target ? c.success : d.actual > 0 ? c.warning : c.muted} />
@@ -97,6 +98,7 @@ export interface SharePoint { name: string; value: number; target?: number; colo
 export function DistributionChart({ data, height = 230 }: { data: SharePoint[]; height?: number }) {
   const c = useChartTheme()
   const tip = useTooltipStyle()
+  const t = useT()
   const total = data.reduce((a, d) => a + d.value, 0) || 1
   return (
     <ResponsiveContainer width="100%" height={height}>
@@ -114,7 +116,7 @@ export function DistributionChart({ data, height = 230 }: { data: SharePoint[]; 
             const value = num(v)
             const target = (item?.payload as SharePoint | undefined)?.target
             const pct = Math.round((value / total) * 100)
-            return [`${pct}% · ${value} h${target != null ? ` (objetivo ${target}%)` : ''}`, String(n)]
+            return [`${pct}% · ${value} h${target != null ? ` (${t('chart.targetPct', { n: target })})` : ''}`, String(n)]
           }}
         />
         <Legend
@@ -133,6 +135,7 @@ export interface RadarPoint { area: string; actual: number; target: number }
 export function SkillRadar({ data, height = 260 }: { data: RadarPoint[]; height?: number }) {
   const c = useChartTheme()
   const tip = useTooltipStyle()
+  const t = useT()
   return (
     <ResponsiveContainer width="100%" height={height}>
       <RadarChart data={data} outerRadius="72%">
@@ -140,10 +143,10 @@ export function SkillRadar({ data, height = 260 }: { data: RadarPoint[]; height?
         <PolarAngleAxis dataKey="area" tick={{ fontSize: 11, fill: c.axis }} />
         <PolarRadiusAxis domain={[0, 5]} tickCount={6} tick={false} axisLine={false} />
         <Radar
-          name="Objetivo" dataKey="target" stroke={c.axis} strokeWidth={1.5}
+          name={t('chart.target')} dataKey="target" stroke={c.axis} strokeWidth={1.5}
           strokeDasharray="4 3" fill={c.axis} fillOpacity={0.1}
         />
-        <Radar name="Actual" dataKey="actual" stroke={c.accent} fill={c.accent} fillOpacity={0.42} />
+        <Radar name={t('chart.now')} dataKey="actual" stroke={c.accent} fill={c.accent} fillOpacity={0.42} />
         <Tooltip {...tip} formatter={(v, n) => [`${num(v).toFixed(1)} / 5`, String(n)]} />
         <Legend
           iconType="circle" iconSize={8}
@@ -161,6 +164,7 @@ export interface CumulativePoint { label: string; real: number | null; plan: num
 export function CumulativeChart({ data, height = 230 }: { data: CumulativePoint[]; height?: number }) {
   const c = useChartTheme()
   const tip = useTooltipStyle()
+  const t = useT()
   return (
     <ResponsiveContainer width="100%" height={height}>
       <AreaChart data={data} margin={{ top: 6, right: 6, left: -22, bottom: 0 }}>
@@ -173,7 +177,7 @@ export function CumulativeChart({ data, height = 230 }: { data: CumulativePoint[
         <CartesianGrid strokeDasharray="3 3" stroke={c.grid} vertical={false} />
         <XAxis dataKey="label" tick={{ ...AXIS, fill: c.axis }} axisLine={false} tickLine={false} />
         <YAxis tick={{ ...AXIS, fill: c.axis }} axisLine={false} tickLine={false} unit="h" />
-        <Tooltip {...tip} formatter={(v, n) => [`${num(v)} h`, n === 'real' ? 'Real acumulado' : 'Plan']} />
+        <Tooltip {...tip} formatter={(v, n) => [`${num(v)} h`, n === 'real' ? t('chart.cumulativeActual') : t('chart.plan')]} />
         <Area type="monotone" dataKey="plan" name="plan" stroke={c.muted} strokeDasharray="4 4" fill="none" strokeWidth={2} />
         <Area
           type="monotone" dataKey="real" name="real" stroke={c.accent} strokeWidth={2.5}
@@ -193,6 +197,7 @@ export interface AreaReadiness { area: string; ready: number; pending: number }
 export function ReadinessChart({ data, height = 260 }: { data: AreaReadiness[]; height?: number }) {
   const c = useChartTheme()
   const tip = useTooltipStyle()
+  const t = useT()
   return (
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={data} layout="vertical" margin={{ top: 4, right: 10, left: 8, bottom: 0 }} barSize={16}>
@@ -202,7 +207,7 @@ export function ReadinessChart({ data, height = 260 }: { data: AreaReadiness[]; 
           type="category" dataKey="area" width={120}
           tick={{ fontSize: 11, fill: c.axis }} axisLine={false} tickLine={false}
         />
-        <Tooltip {...tip} formatter={(v, n) => [num(v), n === 'ready' ? 'Listas' : 'Pendientes']} />
+        <Tooltip {...tip} formatter={(v, n) => [num(v), n === 'ready' ? t('iv.ready') : t('iv.notReady')]} />
         <Bar dataKey="ready" name="ready" stackId="a" fill={c.success} radius={[8, 8, 8, 8]} />
         <Bar dataKey="pending" name="pending" stackId="a" fill={c.muted} radius={[8, 8, 8, 8]} />
       </BarChart>

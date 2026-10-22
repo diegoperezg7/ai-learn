@@ -9,9 +9,9 @@ import { useData, usePrefs, useT } from '../store/useStore'
 
 /** Tabs map to phases. The sprint is what matters day to day, so it opens first. */
 const TABS = [
-  { key: 'Sprint 12w', label: 'Sprint (S1–S12)' },
-  { key: 'Models & Advanced AI', label: 'Diciembre · Models' },
-  { key: 'extra', label: 'Extra' },
+  { key: 'Sprint 12w', label: 'rm.tab.sprint' },
+  { key: 'Models & Advanced AI', label: 'rm.tab.december' },
+  { key: 'extra', label: 'rm.tab.extra' },
 ] as const
 
 const DONE = new Set(['Completed', 'Interview Ready'])
@@ -119,7 +119,7 @@ export function Roadmap() {
     <>
       <div className="page-head">
         <h2>{t('nav.roadmap')}</h2>
-        <p>{sprintDone} de {sprintTasks.length} tareas del sprint completadas · en orden, semana a semana.</p>
+        <p>{t('rm.summary', { done: sprintDone, total: sprintTasks.length })}</p>
       </div>
 
       <Card style={{ marginBottom: 14 }}>
@@ -130,10 +130,10 @@ export function Roadmap() {
         <Card style={{ marginBottom: 14, borderColor: 'var(--danger)', background: 'var(--danger-soft)' }}>
           <div className="row wrap between" style={{ gap: 10 }}>
             <div style={{ minWidth: 0 }}>
-              <div className="small" style={{ color: 'var(--danger)', fontWeight: 700 }}>Pendiente prioritaria para hoy</div>
+              <div className="small" style={{ color: 'var(--danger)', fontWeight: 700 }}>{t('rm.priorityToday')}</div>
               <strong>{overduePlan.title}</strong>
               <div className="small dim" style={{ marginTop: 3 }}>
-                Planificada para {formatDayLabel(overduePlan.day, lang)} · {overduePlan.minutes} min. La fecha original se mantiene en el calendario.
+                {t('rm.plannedFor', { day: formatDayLabel(overduePlan.day, lang), min: overduePlan.minutes })}
               </div>
             </div>
             <div style={{ flexShrink: 0 }}><DaySession plan={overduePlan} /></div>
@@ -144,7 +144,7 @@ export function Roadmap() {
       <div className="tabs">
         {TABS.map((x) => (
           <button key={x.key} className={`tab ${tab === x.key ? 'active' : ''}`} onClick={() => setTab(x.key)}>
-            {x.label}
+            {t(x.label)}
           </button>
         ))}
       </div>
@@ -155,7 +155,7 @@ export function Roadmap() {
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('common.search')} style={{ paddingLeft: 32 }} />
         </div>
         <button className={`btn btn-sm ${hideDone ? 'btn-primary' : ''}`} onClick={() => setHideDone(!hideDone)}>
-          <Check size={14} /> Ocultar hechas
+          <Check size={14} /> {t('rm.hideDone')}
         </button>
       </div>
 
@@ -189,8 +189,8 @@ export function Roadmap() {
                   <div style={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
                     <div className="row" style={{ gap: 8 }}>
                       <strong>{g.title}</strong>
-                      {meta?.current && <Badge tone="accent">Ahora</Badge>}
-                      {allDone && <Badge tone="success">Hecha</Badge>}
+                      {meta?.current && <Badge tone="accent">{t('rm.now')}</Badge>}
+                      {allDone && <Badge tone="success">{t('rm.done')}</Badge>}
                     </div>
                     {g.subtitle && <div className="small muted" style={{ marginTop: 1 }}>{g.subtitle}</div>}
                   </div>
@@ -223,7 +223,7 @@ export function Roadmap() {
                             <div key={day}>
                               <div className="row day-label" style={{ gap: 8, marginBottom: 5 }}>
                                 <strong className="small">{formatDayLabel(day, lang)}</strong>
-                                {day === new Date().toISOString().slice(0, 10) && <Badge tone="accent">Hoy</Badge>}
+                                {day === new Date().toISOString().slice(0, 10) && <Badge tone="accent">{t('common.today')}</Badge>}
                               </div>
                               <div className="col" style={{ gap: 6 }}>
                                 {sessions.map((p) => <DaySession key={p.id} plan={p} />)}
@@ -237,7 +237,7 @@ export function Roadmap() {
                             onClick={() => setShowGoals({ ...showGoals, [g.key]: !showGoals[g.key] })}
                           >
                             {showGoals[g.key] ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                            Objetivos de la semana ({g.tasks.length})
+                            {t('rm.weekGoals', { n: g.tasks.length })}
                           </button>
                           {showGoals[g.key] && (
                             <div className="col" style={{ gap: 8 }}>

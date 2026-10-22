@@ -6,6 +6,7 @@ import {
 } from 'lucide-react'
 
 import { Badge, Card, Empty } from './components/ui'
+import { localizeNotification } from './i18n'
 import { CV } from './pages/CV'
 import { Coach } from './pages/Coach'
 import { Dashboard } from './pages/Dashboard'
@@ -44,6 +45,7 @@ const NAV = [
 
 function NotificationPanel({ onClose }: { onClose: () => void }) {
   const t = useT()
+  const lang = usePrefs((s) => s.lang)
   const { notifications, markNotificationRead, markAllRead } = useData()
 
   const tone = (level: string) =>
@@ -61,22 +63,25 @@ function NotificationPanel({ onClose }: { onClose: () => void }) {
         </div>
         {notifications.length === 0 ? <Empty>{t('notif.empty')}</Empty> : (
           <div className="col" style={{ gap: 8 }}>
-            {notifications.map((n) => (
+            {notifications.map((n) => {
+              const text = localizeNotification(lang, n.title, n.body ?? '')
+              return (
               <div key={n.id} className="task" style={{ opacity: n.read ? 0.55 : 1 }}>
                 <div className="task-body">
                   <div className="row" style={{ gap: 8 }}>
                     <Badge tone={tone(n.level)}>{n.level}</Badge>
-                    <strong className="small" style={{ flex: 1 }}>{n.title}</strong>
+                    <strong className="small" style={{ flex: 1 }}>{text.title}</strong>
                   </div>
-                  {n.body && <span className="small muted">{n.body}</span>}
+                  {text.body && <span className="small muted">{text.body}</span>}
                 </div>
                 {!n.read && (
-                  <button className="btn btn-ghost btn-icon" onClick={() => markNotificationRead(n.id)} aria-label="Marcar leída">
+                  <button className="btn btn-ghost btn-icon" onClick={() => markNotificationRead(n.id)} aria-label={t('aria.markRead')}>
                     <X size={14} />
                   </button>
                 )}
               </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </Card>
@@ -92,6 +97,7 @@ export default function App() {
   const [bellOpen, setBellOpen] = useState(false)
 
   useEffect(() => { document.documentElement.setAttribute('data-theme', theme) }, [theme])
+  useEffect(() => { document.documentElement.lang = lang }, [lang])
   useEffect(() => { loadAll() }, [loadAll])
 
   // Keep the day/pace figures fresh without a reload.
@@ -144,7 +150,7 @@ export default function App() {
 
       <div className="main">
         <header className="topbar">
-          <button className="btn btn-ghost btn-icon mobile-only" onClick={() => setNavOpen(true)} aria-label="Menú">
+          <button className="btn btn-ghost btn-icon mobile-only" onClick={() => setNavOpen(true)} aria-label={t('aria.menu')}>
             <Menu size={18} />
           </button>
           <h1>{dashboard?.current_week_label ?? 'AI-Learn'}</h1>
@@ -153,10 +159,10 @@ export default function App() {
             <Languages size={17} />
             <span className="small" style={{ marginLeft: 2 }}>{lang.toUpperCase()}</span>
           </button>
-          <button className="btn btn-ghost btn-icon" onClick={toggleTheme} aria-label="Tema">
+          <button className="btn btn-ghost btn-icon" onClick={toggleTheme} aria-label={t('aria.theme')}>
             {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
           </button>
-          <button className="btn btn-ghost btn-icon" onClick={() => setBellOpen(!bellOpen)} style={{ position: 'relative' }} aria-label="Notificaciones">
+          <button className="btn btn-ghost btn-icon" onClick={() => setBellOpen(!bellOpen)} style={{ position: 'relative' }} aria-label={t('aria.notifications')}>
             <Bell size={17} />
             {unread > 0 && (
               <span style={{
@@ -166,7 +172,7 @@ export default function App() {
               }}>{unread}</span>
             )}
           </button>
-          <a className="btn btn-ghost btn-icon" href="https://portal.darc3.com" aria-label="Volver al portal" title="Volver al portal">
+          <a className="btn btn-ghost btn-icon" href="https://portal.darc3.com" aria-label={t('aria.portal')} title={t('aria.portal')}>
             <Home size={17} />
           </a>
         </header>

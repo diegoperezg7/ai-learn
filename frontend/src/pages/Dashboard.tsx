@@ -51,13 +51,13 @@ export function Dashboard() {
   const allTodayDone = d.today_plan.length > 0 && todayDone === d.today_plan.length
   const nextOptional = restOfWeek.find((p) => !p.done)
   const recommended = d.next_recommendation
-  const stateLabel = {
-    overdue: 'Pendiente prioritaria',
-    today: 'Tarea de hoy',
-    ahead: 'Vas al día · opcional para avanzar',
-    covered: 'Semana cubierta',
-    break: 'Break · sprint en pausa',
-  }[d.today_state]
+  const stateLabel = t(({
+    overdue: 'dash.state.overdue',
+    today: 'dash.state.today',
+    ahead: 'dash.state.ahead',
+    covered: 'dash.state.covered',
+    break: 'dash.state.break',
+  } as const)[d.today_state])
 
   const rawDay = new Date(`${d.today}T00:00:00`).toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-GB', {
     weekday: 'long', day: 'numeric', month: 'long',
@@ -71,37 +71,39 @@ export function Dashboard() {
       <div className="page-head">
         <h2>{dayLabel}</h2>
         <p>
-          {d.current_week_label} · {fmtHours(weekDoneMin / 60)} de {fmtHours(weekTotalMin / 60)} esta semana · {stateLabel}
-          {d.days_ahead > 0 && ` · ${d.days_ahead} día(s) adelantado(s)`}
+          {d.current_week_label} · {t('dash.weekProgress', { done: fmtHours(weekDoneMin / 60), total: fmtHours(weekTotalMin / 60) })} · {stateLabel}
+          {d.days_ahead > 0 && t('dash.daysAhead', { n: d.days_ahead })}
         </p>
       </div>
 
       <Card style={{ marginBottom: 14, borderColor: allTodayDone ? 'var(--success)' : 'var(--accent)' }}>
         <CardHead
-          title={d.today_plan.length ? `Hoy · ${d.today_minutes_planned} min` : 'Hoy'}
+          title={d.today_plan.length ? t('dash.todayMinutes', { n: d.today_minutes_planned }) : t('common.today')}
           icon={allTodayDone ? <CheckCircle2 size={16} style={{ color: 'var(--success)' }} /> : <Flame size={16} style={{ color: 'var(--accent)' }} />}
           right={d.today_plan.length ? <Badge tone={allTodayDone ? 'success' : 'accent'}>
-            {todayActivities.length ? `${todayActivitiesDone}/${todayActivities.length} actividades` : `${todayDone}/${d.today_plan.length}`}
+            {todayActivities.length
+              ? t('dash.activityCount', { done: todayActivitiesDone, total: todayActivities.length })
+              : `${todayDone}/${d.today_plan.length}`}
           </Badge> : undefined}
         />
 
         {d.today_plan.length === 0 ? (
           <div className="empty">
             <Coffee size={26} style={{ marginBottom: 8, opacity: 0.5 }} />
-            <div><strong>{d.today_state === 'break' ? 'Break.' : d.today_state === 'covered' ? 'Semana cubierta.' : 'Sin tarea asignada hoy.'}</strong></div>
+            <div><strong>{d.today_state === 'break' ? t('dash.breakTitle') : d.today_state === 'covered' ? t('dash.coveredTitle') : t('dash.noTaskTitle')}</strong></div>
             <div className="small" style={{ marginTop: 4 }}>
               {d.today_state === 'break'
-                ? 'El sprint está en pausa. No hay recomendaciones durante este periodo.'
+                ? t('dash.breakBody')
                 : d.today_state === 'covered'
-                  ? 'Has cumplido el objetivo semanal. Puedes descansar o avanzar voluntariamente.'
+                  ? t('dash.coveredBody')
                   : recommended
-                    ? 'Vas al día. Si quieres seguir avanzando, esta es la siguiente tarea recomendada.'
-                    : 'No hay una sesión disponible en este momento.'}
+                    ? t('dash.aheadBody')
+                    : t('dash.noSession')}
             </div>
             {recommended && (
               <div className="row wrap" style={{ justifyContent: 'center', gap: 8, marginTop: 10 }}>
                 <Badge tone="accent">{recommended.title} · {recommended.minutes} min</Badge>
-                <Link to="/roadmap" className="btn btn-sm btn-primary">Ver recomendación <ArrowRight size={13} /></Link>
+                <Link to="/roadmap" className="btn btn-sm btn-primary">{t('dash.viewRecommendation')} <ArrowRight size={13} /></Link>
               </div>
             )}
           </div>
@@ -114,62 +116,60 @@ export function Dashboard() {
               <ProgressBar value={todayPct} tone={allTodayDone ? 'var(--success)' : undefined} />
             </div>
             <div className="row between small dim" style={{ marginTop: 6 }}>
-              <span>{d.today_minutes_done} de {d.today_minutes_planned} min completados</span>
+              <span>{t('dash.minutesDone', { done: d.today_minutes_done, planned: d.today_minutes_planned })}</span>
               <strong>{Math.round(todayPct)}%</strong>
             </div>
             {d.today_extra_minutes > 0 && (
               <div className="small" style={{ color: 'var(--success)', marginTop: 7 }}>
-                +{d.today_extra_minutes} min adelantados: {d.today_extra_titles.join(', ')}
+                {t('dash.extraMinutes', { n: d.today_extra_minutes, titles: d.today_extra_titles.join(', ') })}
               </div>
             )}
             {recommended && (d.today_state === 'overdue' || allTodayDone) && (
               <div className="done-next-card" style={{ borderColor: d.today_state === 'overdue' ? 'var(--danger)' : undefined }}>
                 <div>
-                  <strong>{d.today_state === 'overdue' ? 'Pendiente prioritaria' : 'Siguiente recomendación'}</strong>
+                  <strong>{d.today_state === 'overdue' ? t('dash.state.overdue') : t('dash.nextRecommendation')}</strong>
                   <div className="small dim" style={{ marginTop: 3 }}>
-                    {d.today_state === 'overdue'
-                      ? 'Has avanzado en otras actividades, pero esta tarea core anterior sigue pendiente.'
-                      : 'El objetivo de hoy está cumplido; puedes continuar con la siguiente actividad.'}
+                    {d.today_state === 'overdue' ? t('dash.overdueBody') : t('dash.doneNextBody')}
                   </div>
                   <div className="small" style={{ marginTop: 7 }}>
                     <strong>{recommended.title}</strong> · {recommended.minutes} min
                   </div>
                 </div>
-                <Link to="/roadmap" className="btn btn-sm btn-primary">Abrir tarea <ArrowRight size={13} /></Link>
+                <Link to="/roadmap" className="btn btn-sm btn-primary">{t('dash.openTask')} <ArrowRight size={13} /></Link>
               </div>
             )}
             {allTodayDone && (
               <>
                 <p className="small" style={{ color: 'var(--success)', marginBottom: 8, marginTop: 8 }}>
-                  Hecho. {d.today_minutes_done} minutos registrados hoy.
+                  {t('dash.doneToday', { n: d.today_minutes_done })}
                 </p>
                 <div className="done-next-card">
                   <div>
-                    <strong>¿Quieres hacer algo más?</strong>
+                    <strong>{t('dash.wantMore')}</strong>
                     <div className="small dim" style={{ marginTop: 3 }}>
-                      El objetivo de hoy está cumplido. Puedes parar aquí o revisar la próxima lección y decidir si hacerla completa o dividirla en bloques.
+                      {t('dash.wantMoreBody')}
                     </div>
                     {nextOptional && (
                       <div className="small" style={{ marginTop: 7 }}>
-                        Siguiente: <strong>{nextOptional.title}</strong> · {nextOptional.minutes} min
+                        {t('dash.nextLabel')} <strong>{nextOptional.title}</strong> · {nextOptional.minutes} min
                       </div>
                     )}
                   </div>
                   <div className="row wrap" style={{ gap: 6, flexShrink: 0 }}>
                     {nextOptional && !nextOptional.started && (
-                      <Link to="/roadmap" className="btn btn-sm">Revisar próxima lección</Link>
+                      <Link to="/roadmap" className="btn btn-sm">{t('dash.reviewNext')}</Link>
                     )}
                     {nextOptional && !nextOptional.started && (
                       <button className="btn btn-sm btn-primary" onClick={() => startDayPlan(nextOptional)}>
-                        Empezar <ArrowRight size={13} />
+                        {t('dash.start')} <ArrowRight size={13} />
                       </button>
                     )}
                     {nextOptional?.started && (
                       <button className="btn btn-sm btn-primary" onClick={() => completeDayPlan(nextOptional)}>
-                        Marcar completada <CheckCircle2 size={13} />
+                        {t('dash.markComplete')} <CheckCircle2 size={13} />
                       </button>
                     )}
-                    {!nextOptional && <Link to="/roadmap" className="btn btn-sm btn-primary">Explorar roadmap <ArrowRight size={13} /></Link>}
+                    {!nextOptional && <Link to="/roadmap" className="btn btn-sm btn-primary">{t('dash.exploreRoadmap')} <ArrowRight size={13} /></Link>}
                   </div>
                 </div>
               </>
@@ -181,9 +181,9 @@ export function Dashboard() {
       {/* ---------------------------------------------------------- KPIs */}
       <div className="grid grid-4" style={{ marginBottom: 14 }}>
         <Card>
-          <div className="stat-label">Esta semana</div>
+          <div className="stat-label">{t('dash.thisWeek')}</div>
           <div className="stat-value">{fmtHours(d.hours_this_week)}</div>
-          <div className="stat-sub">de {fmtHours(d.weekly_target)}</div>
+          <div className="stat-sub">{t('dash.ofTarget', { target: fmtHours(d.weekly_target) })}</div>
           <div style={{ marginTop: 8 }}>
             <ProgressBar value={d.weekly_target ? (d.hours_this_week / d.weekly_target) * 100 : 0} thin />
           </div>
@@ -200,13 +200,13 @@ export function Dashboard() {
         <Card>
           <div className="stat-label">{t('dash.streak')}</div>
           <div className="stat-value">{d.streak_days}</div>
-          <div className="stat-sub">días seguidos</div>
+          <div className="stat-sub">{t('dash.streakDays')}</div>
         </Card>
         <Card>
-          <div className="stat-label">Plan restante</div>
+          <div className="stat-label">{t('dash.planLeft')}</div>
           <div className="stat-value">{d.plan_days_remaining}</div>
-          <div className="stat-sub">días · termina {d.estimated_completion_date ? fmtDate(d.estimated_completion_date, lang) : '—'}</div>
-          <div className="small dim" style={{ marginTop: 4 }}>Deadline: {d.days_to_core} días</div>
+          <div className="stat-sub">{t('dash.planEnds', { date: d.estimated_completion_date ? fmtDate(d.estimated_completion_date, lang) : '—' })}</div>
+          <div className="small dim" style={{ marginTop: 4 }}>{t('dash.deadlineLine', { n: d.days_to_core })}</div>
         </Card>
       </div>
 
@@ -218,7 +218,7 @@ export function Dashboard() {
               <div className="row" style={{ gap: 10 }}>
                 <AlertTriangle size={17} style={{ color: 'var(--danger)', flexShrink: 0 }} />
                 <span className="small" style={{ flex: 1 }}>
-                  Vas <strong>{Math.abs(d.pace_delta_hours)} h</strong> por detrás. Recorta alcance o suma 30 min al día — no metas una jornada doble.
+                  {t('dash.behindWarning', { hours: Math.abs(d.pace_delta_hours) })}
                 </span>
               </div>
             </Card>
@@ -228,9 +228,9 @@ export function Dashboard() {
               <div className="row" style={{ gap: 10 }}>
                 <Brain size={17} style={{ color: 'var(--accent)', flexShrink: 0 }} />
                 <span className="small" style={{ flex: 1 }}>
-                  <strong>{d.questions_due}</strong> pregunta(s) tocan repaso hoy.
+                  {t('dash.questionsDue', { n: d.questions_due })}
                 </span>
-                <Link to="/interview" className="btn btn-sm">Repasar <ArrowRight size={13} /></Link>
+                <Link to="/interview" className="btn btn-sm">{t('dash.reviewQuestions')} <ArrowRight size={13} /></Link>
               </div>
             </Card>
           )}
@@ -241,15 +241,15 @@ export function Dashboard() {
       <div className="grid grid-main">
       <Card>
         <CardHead
-          title="Lo que queda esta semana"
+          title={t('dash.restOfWeek')}
           icon={<CalendarDays size={16} style={{ color: 'var(--accent)' }} />}
-          right={<Link to="/roadmap" className="btn btn-sm">Ver roadmap <ArrowRight size={13} /></Link>}
+          right={<Link to="/roadmap" className="btn btn-sm">{t('dash.viewRoadmap')} <ArrowRight size={13} /></Link>}
         />
         {restOfWeek.length === 0 ? (
-          <Empty>Semana cerrada. Buen trabajo.</Empty>
+          <Empty>{t('dash.weekClosed')}</Empty>
         ) : (
           <div className="col" style={{ gap: 6 }}>
-            <div className="small dim" style={{ marginBottom: 2 }}>Después de hoy, sigue esto:</div>
+            <div className="small dim" style={{ marginBottom: 2 }}>{t('dash.afterToday')}</div>
             {restOfWeek.map((p) => (
               <div key={p.id} className="row upcoming" style={{ gap: 10 }}>
                 <span className="badge" style={{ minWidth: 62, justifyContent: 'center' }}>{fmtDate(p.day, lang)}</span>
@@ -263,9 +263,9 @@ export function Dashboard() {
 
       <Card>
         <CardHead
-          title="Horas por semana"
+          title={t('dash.hoursPerWeek')}
           icon={<TrendingUp size={16} style={{ color: 'var(--accent)' }} />}
-          right={<Link to="/progress" className="btn btn-sm">Más gráficos <ArrowRight size={13} /></Link>}
+          right={<Link to="/progress" className="btn btn-sm">{t('dash.moreCharts')} <ArrowRight size={13} /></Link>}
         />
         <WeeklyHoursChart data={weekChart} height={190} />
       </Card>

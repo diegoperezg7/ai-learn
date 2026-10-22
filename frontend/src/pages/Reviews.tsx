@@ -2,19 +2,20 @@ import { useState } from 'react'
 import { CheckCircle2, ClipboardList } from 'lucide-react'
 
 import { Badge, Card, Empty, ProgressBar, fmtHours } from '../components/ui'
+import type { TKey } from '../i18n'
 import type { WeeklyReview } from '../lib/api'
 import { useData, useT } from '../store/useStore'
 
-const FIELDS: { key: keyof WeeklyReview; label: string; placeholder: string }[] = [
-  { key: 'built', label: 'Qué he construido', placeholder: 'Código, sistemas, documentos…' },
-  { key: 'learned', label: 'Conceptos aprendidos', placeholder: 'Lo que ahora entiendo y antes no' },
-  { key: 'cannot_explain_yet', label: 'Lo que todavía NO puedo explicar', placeholder: 'Sé honesto: esto marca la semana siguiente' },
-  { key: 'without_ai', label: 'Qué hice sin IA', placeholder: 'Modo entrenamiento' },
-  { key: 'with_ai', label: 'Qué hice con IA', placeholder: 'Modo producción' },
-  { key: 'blockers', label: 'Bloqueos', placeholder: 'Qué me frenó' },
-  { key: 'biggest_weakness', label: 'Mayor debilidad actual', placeholder: '' },
-  { key: 'biggest_improvement', label: 'Mayor mejora', placeholder: '' },
-  { key: 'next_week_goal', label: 'Objetivo de la próxima semana', placeholder: '' },
+const FIELDS: { key: keyof WeeklyReview; label: TKey; placeholder: TKey | null }[] = [
+  { key: 'built', label: 'rev.built', placeholder: 'rev.builtPh' },
+  { key: 'learned', label: 'rev.learned', placeholder: 'rev.learnedPh' },
+  { key: 'cannot_explain_yet', label: 'rev.cannot', placeholder: 'rev.cannotPh' },
+  { key: 'without_ai', label: 'rev.withoutAi', placeholder: 'rev.withoutAiPh' },
+  { key: 'with_ai', label: 'rev.withAi', placeholder: 'rev.withAiPh' },
+  { key: 'blockers', label: 'rev.blockers', placeholder: 'rev.blockersPh' },
+  { key: 'biggest_weakness', label: 'rev.weakness', placeholder: null },
+  { key: 'biggest_improvement', label: 'rev.improvement', placeholder: null },
+  { key: 'next_week_goal', label: 'rev.nextGoal', placeholder: null },
 ]
 
 function ReviewCard({ review }: { review: WeeklyReview }) {
@@ -39,8 +40,8 @@ function ReviewCard({ review }: { review: WeeklyReview }) {
           <div style={{ fontWeight: 650 }}>{review.label}</div>
           <div className="small dim">{review.start_date} → {review.end_date}</div>
         </div>
-        {review.is_current && <Badge tone="accent">Actual</Badge>}
-        {review.done && <Badge tone="success"><CheckCircle2 size={11} />Cerrada</Badge>}
+        {review.is_current && <Badge tone="accent">{t('rev.current')}</Badge>}
+        {review.done && <Badge tone="success"><CheckCircle2 size={11} />{t('rev.closed')}</Badge>}
         <Badge tone={pct >= 100 ? 'success' : pct > 0 ? 'warning' : ''}>
           {fmtHours(review.actual_hours)} / {fmtHours(review.target_hours)}
         </Badge>
@@ -52,12 +53,12 @@ function ReviewCard({ review }: { review: WeeklyReview }) {
         <div className="col" style={{ gap: 10, marginTop: 14 }}>
           <div className="grid grid-2" style={{ gap: 10 }}>
             <div className="field" style={{ margin: 0 }}>
-              <label>Ejercicios Exercism</label>
+              <label>{t('rev.exercism')}</label>
               <input type="number" min={0} value={local.exercism_done}
                 onChange={(e) => commit('exercism_done', Number(e.target.value))} />
             </div>
             <div className="field" style={{ margin: 0 }}>
-              <label>Preguntas de entrevista superadas</label>
+              <label>{t('rev.interviewPassed')}</label>
               <input type="number" min={0} value={local.interview_qs_passed}
                 onChange={(e) => commit('interview_qs_passed', Number(e.target.value))} />
             </div>
@@ -65,10 +66,10 @@ function ReviewCard({ review }: { review: WeeklyReview }) {
 
           {FIELDS.map((f) => (
             <div className="field" style={{ margin: 0 }} key={String(f.key)}>
-              <label>{f.label}</label>
+              <label>{t(f.label)}</label>
               <textarea
                 value={String(local[f.key] ?? '')}
-                placeholder={f.placeholder}
+                placeholder={f.placeholder ? t(f.placeholder) : ''}
                 style={{ minHeight: 62 }}
                 onChange={(e) => setLocal({ ...local, [f.key]: e.target.value } as WeeklyReview)}
                 onBlur={(e) => patchReview(review.id, { [f.key]: e.target.value } as Partial<WeeklyReview>)}
@@ -77,7 +78,7 @@ function ReviewCard({ review }: { review: WeeklyReview }) {
           ))}
 
           <button className={`btn ${local.done ? '' : 'btn-primary'}`} onClick={() => commit('done', !local.done)}>
-            <CheckCircle2 size={14} />{local.done ? 'Reabrir' : t('rev.markDone')}
+            <CheckCircle2 size={14} />{local.done ? t('rev.reopen') : t('rev.markDone')}
           </button>
         </div>
       )}

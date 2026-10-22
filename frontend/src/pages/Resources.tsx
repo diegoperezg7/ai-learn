@@ -31,18 +31,18 @@ export function Resources() {
 
       <Card style={{ marginBottom: 14 }}>
         <div className="row wrap" style={{ gap: 14 }}>
-          <span className="small"><strong>{totalHours}</strong> h totales planificadas</span>
-          <span className="small"><strong>{freeCount}</strong> recursos 100% gratuitos</span>
-          <span className="small muted">Ninguno requiere Coursera Plus</span>
+          <span className="small">{t('res.plannedHours', { n: totalHours })}</span>
+          <span className="small">{t('res.freeCount', { n: freeCount })}</span>
+          <span className="small muted">{t('res.noCoursera')}</span>
         </div>
       </Card>
 
       <div className="tabs">
         <button className={`tab ${tab === 'active' ? 'active' : ''}`} onClick={() => setTab('active')}>
-          Activos ({resources.filter((r) => r.status !== 'Dropped').length})
+          {t('res.active', { n: resources.filter((r) => r.status !== 'Dropped').length })}
         </button>
         <button className={`tab ${tab === 'dropped' ? 'active' : ''}`} onClick={() => setTab('dropped')}>
-          Descartados ({resources.filter((r) => r.status === 'Dropped').length})
+          {t('res.dropped', { n: resources.filter((r) => r.status === 'Dropped').length })}
         </button>
       </div>
 
@@ -75,8 +75,10 @@ export function Resources() {
                   {r.verdict && <p className="small muted" style={{ margin: '0 0 8px' }}><strong>{t('res.verdict')}: </strong>{r.verdict}</p>}
                   <div style={{ maxWidth: 520, marginBottom: 10 }}>
                     <div className="row between small dim">
-                      <span>{r.activities_total ? `${r.activities_done}/${r.activities_total} actividades` : `${r.tasks_done}/${r.tasks_total} tareas`}</span>
-                      <span>{r.hours_logged} h registradas</span>
+                      <span>{r.activities_total
+                        ? t('res.progressActivities', { done: r.activities_done, total: r.activities_total })
+                        : t('res.progressTasks', { done: r.tasks_done, total: r.tasks_total })}</span>
+                      <span>{t('res.loggedHours', { n: r.hours_logged })}</span>
                     </div>
                     <ProgressBar value={r.activities_total ? (r.activities_done / r.activities_total) * 100 : r.tasks_total ? (r.tasks_done / r.tasks_total) * 100 : 0} thin />
                   </div>

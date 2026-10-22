@@ -62,7 +62,7 @@ export function Coach() {
             <AlertTriangle size={17} style={{ color: 'var(--warning)' }} />
             <div>
               <strong>{t('coach.offline')}</strong>
-              <div className="small dim">{health.url || 'sin URL'} · {health.error ?? ''}</div>
+              <div className="small dim">{health.url || t('coach.noUrl')} · {health.error ?? ''}</div>
             </div>
           </div>
         </Card>
@@ -71,9 +71,9 @@ export function Coach() {
       {health?.available && health.model_present === false && (
         <Card style={{ marginBottom: 14, borderColor: 'var(--warning)' }}>
           <div className="small">
-            Ollama responde, pero el modelo <code>{health.model}</code> no está descargado.
-            Ejecuta <code className="mono">ollama pull {health.model}</code>.
-            {health.models?.length ? <> Disponibles: {health.models.join(', ')}</> : null}
+            {t('coach.modelUp')} <code>{health.model}</code> {t('coach.modelMissing')}{' '}
+            <code className="mono">ollama pull {health.model}</code>.
+            {health.models?.length ? <> {t('coach.available')} {health.models.join(', ')}</> : null}
           </div>
         </Card>
       )}
@@ -98,14 +98,14 @@ export function Coach() {
           {turns.length === 0 && (
             <Empty>
               <Bot size={26} style={{ marginBottom: 8, opacity: 0.5 }} />
-              <div>El coach ve tu semana, tu ritmo y tus skills débiles.</div>
-              <div className="small" style={{ marginTop: 6 }}>Nunca escribe la solución: explica, pregunta y revisa.</div>
+              <div>{t('coach.empty')}</div>
+              <div className="small" style={{ marginTop: 6 }}>{t('coach.emptyHint')}</div>
             </Empty>
           )}
           {turns.map((turn, i) => (
             <div key={i} className={`bubble ${turn.role === 'user' ? 'user' : 'bot'}`}>{turn.content}</div>
           ))}
-          {busy && <div className="bubble bot dim">Pensando…</div>}
+          {busy && <div className="bubble bot dim">{t('coach.thinking')}</div>}
           <div ref={endRef} />
         </div>
 
@@ -123,7 +123,7 @@ export function Coach() {
             <Send size={17} />
           </button>
         </div>
-        <p className="small dim coach-hint">Enter para enviar · Shift + Enter para nueva línea</p>
+        <p className="small dim coach-hint">{t('coach.hint')}</p>
       </Card>
     </>
   )

@@ -35,7 +35,11 @@ export const usePrefs = create<Prefs>()(
 /** Translation hook bound to the persisted language. */
 export function useT() {
   const lang = usePrefs((s) => s.lang)
-  return (key: TKey) => translate(lang, key)
+  return (key: TKey, vars?: Record<string, string | number>) => translate(lang, key, vars)
+}
+
+function tr(key: TKey, vars?: Record<string, string | number>) {
+  return translate(usePrefs.getState().lang, key, vars)
 }
 
 interface DataState {
@@ -112,7 +116,7 @@ export const useData = create<DataState>()((set, get) => ({
       ])
       set({ dashboard, tasks, skills, resources, questions, reviews, sessions, notifications, days, loaded: true })
     } catch (e) {
-      set({ error: e instanceof Error ? e.message : 'Error de carga' })
+      set({ error: e instanceof Error ? e.message : tr('common.loadError') })
     } finally {
       set({ loading: false })
     }
@@ -134,7 +138,7 @@ export const useData = create<DataState>()((set, get) => ({
     } else {
       const updated = await api.completeDay(plan.id)
       set({ days: get().days.map((d) => (d.id === plan.id ? updated : d)) })
-      get().toast(`+${plan.minutes} min · ${plan.title}`, 'success')
+      get().toast(tr('toast.minutes', { n: plan.minutes, title: plan.title }), 'success')
     }
     const [dashboard, sessions, tasks, days] = await Promise.all([api.dashboard(), api.sessions(), api.tasks(), api.days()])
     set({ dashboard, sessions, tasks, days })
@@ -143,7 +147,7 @@ export const useData = create<DataState>()((set, get) => ({
   startDayPlan: async (plan) => {
     const updated = await api.startDay(plan.id)
     set({ days: get().days.map((d) => (d.id === plan.id ? updated : d)) })
-    get().toast(`En curso · ${plan.title}`, 'success')
+    get().toast(tr('toast.inProgress', { title: plan.title }), 'success')
     await get().refreshDashboard()
   },
 
@@ -160,7 +164,7 @@ export const useData = create<DataState>()((set, get) => ({
     await get().refreshDashboard()
     if (status === 'Completed') {
       await get().loadSuggestions()
-      get().toast('Tarea completada', 'success')
+      get().toast(tr('toast.taskDone'), 'success')
     }
   },
 
@@ -186,7 +190,7 @@ export const useData = create<DataState>()((set, get) => ({
     const [tasks, sessions] = await Promise.all([api.tasks(), api.sessions()])
     set({ tasks, sessions })
     await get().refreshDashboard()
-    get().toast(`+${body.minutes} min registrados`, 'success')
+    get().toast(tr('toast.minutesLogged', { n: body.minutes }), 'success')
   },
 
   patchSkill: async (id, body) => {
@@ -223,7 +227,7 @@ export const useData = create<DataState>()((set, get) => ({
   acceptSuggestion: async (id) => {
     await api.acceptSuggestion(id)
     set({ suggestions: get().suggestions.filter((s) => s.id !== id) })
-    get().toast('Añadido al currículum', 'success')
+    get().toast(tr('toast.addedCv'), 'success')
   },
 
   rejectSuggestion: async (id) => {

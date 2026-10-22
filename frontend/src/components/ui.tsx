@@ -1,6 +1,8 @@
 import { Check, X } from 'lucide-react'
 import type { ReactNode } from 'react'
 
+import { useT } from '../store/useStore'
+
 export function Card({ children, className = '', style }: { children: ReactNode; className?: string; style?: React.CSSProperties }) {
   return <div className={`card ${className}`} style={style}>{children}</div>
 }
@@ -54,12 +56,13 @@ export function Checkbox({ checked, onChange, label }: { checked: boolean; onCha
 }
 
 export function Modal({ title, onClose, children, footer }: { title: ReactNode; onClose: () => void; children: ReactNode; footer?: ReactNode }) {
+  const t = useT()
   return (
     <div className="overlay" onClick={onClose} role="presentation">
       <div className="modal" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
         <div className="modal-head">
           <h3 style={{ flex: 1, fontSize: 15 }}>{title}</h3>
-          <button className="btn btn-ghost btn-icon" onClick={onClose} aria-label="Cerrar"><X size={17} /></button>
+          <button className="btn btn-ghost btn-icon" onClick={onClose} aria-label={t('common.close')}><X size={17} /></button>
         </div>
         <div className="modal-body">{children}</div>
         {footer && <div className="modal-foot">{footer}</div>}

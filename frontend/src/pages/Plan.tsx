@@ -176,9 +176,9 @@ export function CalendarPage() {
         <Card>
           <div className="row" style={{ marginBottom: 12, gap: 8 }}>
             <strong>{picked}</strong>
-            <Badge>{selected.length} sesión(es)</Badge>
+            <Badge>{t('cal.sessions', { n: selected.length })}</Badge>
           </div>
-          {selected.length === 0 ? <Empty>Día libre</Empty> : (
+          {selected.length === 0 ? <Empty>{t('cal.dayOff')}</Empty> : (
             <div className="col" style={{ gap: 8 }}>{selected.map((x) => <DaySession key={x.id} plan={x} />)}</div>
           )}
         </Card>

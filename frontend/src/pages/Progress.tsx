@@ -103,42 +103,42 @@ export function ProgressPage() {
   return (
     <>
       <div className="page-head">
-        <h2>Progreso</h2>
-        <p>Los números sin maquillar. Si algo va mal, aquí se ve.</p>
+        <h2>{t('prog.title')}</h2>
+        <p>{t('prog.subtitle')}</p>
       </div>
 
       <div className="grid grid-2" style={{ marginBottom: 14 }}>
         <Card>
-          <CardHead title="Horas por semana" icon={<TrendingUp size={16} style={{ color: 'var(--accent)' }} />} />
+          <CardHead title={t('dash.hoursPerWeek')} icon={<TrendingUp size={16} style={{ color: 'var(--accent)' }} />} />
           {weekData.length === 0 ? <Empty>{t('common.empty')}</Empty> : <WeeklyHoursChart data={weekData} />}
           <p className="small dim" style={{ margin: '6px 0 0' }}>
-            Verde = llegas al objetivo · ámbar = por debajo · línea = 6 h.
+            {t('prog.weekLegend')}
           </p>
         </Card>
 
         <Card>
-          <CardHead title="Horas acumuladas vs plan" icon={<Activity size={16} style={{ color: 'var(--accent)' }} />} />
+          <CardHead title={t('prog.cumulative')} icon={<Activity size={16} style={{ color: 'var(--accent)' }} />} />
           {cumulative.length === 0 ? <Empty>{t('common.empty')}</Empty> : <CumulativeChart data={cumulative} />}
           <p className="small dim" style={{ margin: '6px 0 0' }}>
-            La distancia entre las dos líneas es tu deuda real.
+            {t('prog.cumulativeHint')}
           </p>
         </Card>
       </div>
 
       <div className="grid grid-2" style={{ marginBottom: 14 }}>
         <Card>
-          <CardHead title="Nivel por pilar" icon={<RadarIcon size={16} style={{ color: 'var(--accent)' }} />} />
+          <CardHead title={t('prog.levelByPillar')} icon={<RadarIcon size={16} style={{ color: 'var(--accent)' }} />} />
           {radar.length === 0 ? <Empty>{t('common.empty')}</Empty> : <SkillRadar data={radar} />}
           <p className="small dim" style={{ margin: '6px 0 0' }}>
-            Media de nivel actual frente al objetivo, sobre 5.
+            {t('prog.levelHint')}
           </p>
         </Card>
 
         <Card>
-          <CardHead title="Reparto del sprint" icon={<PieIcon size={16} style={{ color: 'var(--accent)' }} />} />
+          <CardHead title={t('prog.sprintSplit')} icon={<PieIcon size={16} style={{ color: 'var(--accent)' }} />} />
           {distribution.length === 0 ? <Empty>{t('common.empty')}</Empty> : <DistributionChart data={distribution} />}
           <p className="small dim" style={{ margin: '6px 0 0' }}>
-            Horas planificadas de las 12 semanas. Objetivo 40 / 30 / 20 / 10.
+            {t('prog.sprintHint')}
           </p>
         </Card>
       </div>
@@ -146,44 +146,44 @@ export function ProgressPage() {
       <div className="grid grid-2">
         <Card>
           <CardHead
-            title="Entrevistas por área"
+            title={t('prog.interviewsByArea')}
             icon={<Target size={16} style={{ color: 'var(--accent)' }} />}
           />
           {readiness.length === 0 ? <Empty>{t('common.empty')}</Empty> : <ReadinessChart data={readiness} />}
           <p className="small dim" style={{ margin: '6px 0 0' }}>
-            Verde = puedes explicarla e implementarla. Lo demás, no cuenta.
+            {t('prog.interviewHint')}
           </p>
         </Card>
 
         <Card>
-          <CardHead title="Práctica vs teoría" icon={<Flame size={16} style={{ color: 'var(--accent)' }} />} />
+          <CardHead title={t('prog.practiceVsTheory')} icon={<Flame size={16} style={{ color: 'var(--accent)' }} />} />
           {modeSplit.total === 0 ? (
-            <Empty>Registra alguna sesión y aquí verás si cumples el 70/30.</Empty>
+            <Empty>{t('prog.emptyModes')}</Empty>
           ) : (
             <>
               <div className="row" style={{ gap: 14, marginBottom: 12 }}>
                 <div className="stat">
-                  <span className="stat-label">Práctica</span>
+                  <span className="stat-label">{t('prog.practice')}</span>
                   <span
                     className="stat-value"
                     style={{ color: modeSplit.practicePct >= 60 ? 'var(--success)' : 'var(--warning)' }}
                   >
                     {modeSplit.practicePct}%
                   </span>
-                  <span className="stat-sub">objetivo 70%</span>
+                  <span className="stat-sub">{t('prog.target70')}</span>
                 </div>
                 <div className="stat">
-                  <span className="stat-label">Total registrado</span>
+                  <span className="stat-label">{t('prog.totalLogged')}</span>
                   <span className="stat-value">{fmtHours(modeSplit.total / 60)}</span>
-                  <span className="stat-sub">{sessions.length} sesiones</span>
+                  <span className="stat-sub">{t('prog.sessions', { n: sessions.length })}</span>
                 </div>
               </div>
               <DistributionChart
                 height={180}
                 data={[
-                  { name: 'Práctica', value: modeSplit.acc.Practice ?? 0, color: c.success },
-                  { name: 'Teoría', value: modeSplit.acc.Theory ?? 0, color: c.accent },
-                  { name: 'Mixta', value: modeSplit.acc.Mixed ?? 0, color: c.warning },
+                  { name: t('prog.practice'), value: modeSplit.acc.Practice ?? 0, color: c.success },
+                  { name: t('prog.theory'), value: modeSplit.acc.Theory ?? 0, color: c.accent },
+                  { name: t('prog.mixed'), value: modeSplit.acc.Mixed ?? 0, color: c.warning },
                 ].filter((d) => d.value > 0)}
               />
             </>

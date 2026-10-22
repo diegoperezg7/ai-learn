@@ -58,10 +58,10 @@ function SkillModal({ skill, onClose }: { skill: Skill; onClose: () => void }) {
           {skill.category}
         </span>
         <Badge tone={PRIORITY_TONE[skill.priority]}>{skill.priority}</Badge>
-        <Badge>{fmtHours(skill.hours_logged)} registradas</Badge>
-        <Badge>{skill.tasks_done}/{skill.tasks_total} tareas</Badge>
-        <Badge>{skill.activities_done}/{skill.activities_total} actividades</Badge>
-        <Badge>{skill.questions_ready}/{skill.questions_total} preguntas</Badge>
+        <Badge>{fmtHours(skill.hours_logged)} {t('task.logged')}</Badge>
+        <Badge>{t('skills.tasks', { done: skill.tasks_done, total: skill.tasks_total })}</Badge>
+        <Badge>{t('skills.activities', { done: skill.activities_done, total: skill.activities_total })}</Badge>
+        <Badge>{t('skills.questions', { done: skill.questions_ready, total: skill.questions_total })}</Badge>
       </div>
 
       <p className="muted" style={{ marginTop: 0 }}>{skill.description}</p>
@@ -84,22 +84,22 @@ function SkillModal({ skill, onClose }: { skill: Skill; onClose: () => void }) {
         <div className="row" style={{ gap: 8 }}>
           <LevelBar current={level} target={5} />
           <span className="small dim">
-            0 nada · 1 leído · 2 usado con IA · 3 usado sin IA · 4 sé explicarlo · 5 sé diseñarlo
+            {t('skills.scale')}
           </span>
         </div>
       </div>
 
       <div className="card" style={{ background: 'var(--surface-2)', marginBottom: 14 }}>
         <div className="row between small" style={{ marginBottom: 6 }}>
-          <strong>Evidencia acumulada</strong><span>{Math.round(skill.evidence_percent)}%</span>
+          <strong>{t('skills.evidenceAccumulated')}</strong><span>{Math.round(skill.evidence_percent)}%</span>
         </div>
         <ProgressBar value={skill.evidence_percent} />
         <div className="small dim" style={{ marginTop: 7 }}>
-          Se calcula con tareas, actividades, recursos terminados y horas reales.
+          {t('skills.evidenceHow')}
         </div>
         {skill.linked_resources.length > 0 && (
           <div className="small muted" style={{ marginTop: 8 }}>
-            Recursos vinculados: {skill.linked_resources.map((resource) => resource.name).join(' · ')}
+            {t('skills.linkedResources', { names: skill.linked_resources.map((resource) => resource.name).join(' · ') })}
           </div>
         )}
       </div>
@@ -147,7 +147,10 @@ export function Skills() {
       <Card style={{ marginBottom: 14 }}>
         <div className="row wrap" style={{ gap: 8 }}>
           <Award size={16} style={{ color: 'var(--accent)' }} />
-          <span className="small"><strong>{avg}%</strong> del nivel objetivo global</span>
+          <span className="small">
+            <strong>{avg}%</strong>
+            {t('skills.ofTarget', { n: avg }).slice(`${avg}%`.length)}
+          </span>
           <div style={{ flex: 1, minWidth: 120 }}><ProgressBar value={avg} thin /></div>
           <select value={cat} onChange={(e) => setCat(e.target.value)} style={{ width: 'auto' }}>
             <option value="all">{t('common.all')}</option>
@@ -173,7 +176,7 @@ export function Skills() {
                         <Logo icon={s.icon} dark={theme === 'dark'} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ fontWeight: 650 }}>{s.name}</div>
-                          <div className="small dim">{fmtHours(s.hours_logged)} · {s.tasks_done}/{s.tasks_total} tareas · {s.activities_done}/{s.activities_total} actividades</div>
+                          <div className="small dim">{t('skills.cardMeta', { hours: fmtHours(s.hours_logged), tasks: `${s.tasks_done}/${s.tasks_total}`, acts: `${s.activities_done}/${s.activities_total}` })}</div>
                         </div>
                         <Badge tone={PRIORITY_TONE[s.priority]}>{s.priority}</Badge>
                       </div>
@@ -186,7 +189,7 @@ export function Skills() {
                         <Badge tone={STATUS_TONE[s.status]}>{s.status}</Badge>
                       </div>
                       <div style={{ marginTop: 8 }}>
-                        <div className="row between small dim"><span>Evidencia</span><span>{Math.round(s.evidence_percent)}%</span></div>
+                        <div className="row between small dim"><span>{t('common.evidence')}</span><span>{Math.round(s.evidence_percent)}%</span></div>
                         <ProgressBar value={s.evidence_percent} thin />
                       </div>
                     </div>

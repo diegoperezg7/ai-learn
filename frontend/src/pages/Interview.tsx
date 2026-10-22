@@ -106,7 +106,7 @@ export function Interview() {
                     <Badge>{x.area}</Badge>
                     <Badge tone={x.difficulty === 'Senior' ? 'danger' : x.difficulty === 'Mid' ? 'warning' : ''}>{x.difficulty}</Badge>
                     <Badge tone={READINESS_TONE[x.readiness]}>{x.readiness}</Badge>
-                    {x.last_reviewed && <span className="small dim">Revisada {x.last_reviewed}</span>}
+                    {x.last_reviewed && <span className="small dim">{t('iv.reviewed', { date: x.last_reviewed })}</span>}
                   </div>
                 </div>
                 <div className="col" style={{ gap: 6, alignItems: 'flex-start' }}>

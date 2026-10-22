@@ -62,7 +62,7 @@ export function CV() {
       const doc = await api.saveCV(draft)
       setContent(doc.content)
       setEditing(false)
-      toast('Currículum guardado', 'success')
+      toast(t('cv.saved'), 'success')
     } finally {
       setBusy(false)
     }
@@ -73,7 +73,7 @@ export function CV() {
     try {
       const res = await api.syncCV()
       await loadSuggestions()
-      toast(res.created ? `${res.created} sugerencia(s) nueva(s)` : 'Sin novedades todavía')
+      toast(res.created ? t('cv.newSuggestions', { n: res.created }) : t('cv.noNews'))
     } finally {
       setBusy(false)
     }
