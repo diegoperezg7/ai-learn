@@ -38,6 +38,9 @@ jobs:
 
       - name: Reconstruir y arrancar la aplicación
         working-directory: ${{ github.workspace }}
+        env:
+          # Contraseña rotada de Postgres. Settings → Secrets → POSTGRES_PASSWORD.
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
         run: |
           docker compose -f docker-compose.yml -f docker-compose.portal.yml up -d --build --force-recreate
           docker compose -f docker-compose.yml -f docker-compose.portal.yml ps

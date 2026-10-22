@@ -8,7 +8,8 @@ services:
     # donde estaban los backends de las demás apps.
     networks: [hub, edge-hub, edge-db-hub]
     environment:
-      DATABASE_URL: postgresql+psycopg://postgres:${POSTGRES_PASSWORD}@supabase-db:5432/postgres
+      # La contraseña no va en git: .env o el secret POSTGRES_PASSWORD de Actions.
+      DATABASE_URL: "postgresql+psycopg://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}@supabase-db:5432/postgres"
       DATABASE_SCHEMA: ai_learn
       REQUIRE_PORTAL_AUTH: "true"
       COACH_ENABLED: "true"

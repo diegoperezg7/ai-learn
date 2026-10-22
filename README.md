@@ -281,6 +281,8 @@ sequenceDiagram
 ```
 
 ```bash
+cp .env.example .env   # si aún no existe
+# Edita POSTGRES_PASSWORD en .env con la contraseña ya rotada. No la subas al repo.
 docker compose -f docker-compose.yml -f docker-compose.portal.yml up -d --build
 /add-to-portal
 ```
@@ -293,18 +295,25 @@ en Cloudflare Zero Trust, **es manual**.
 
 ## Configuración
 
-Todo por variables de entorno, ver `.env.example`. Los valores de produccion viven ademas
-en el repo: los ocho de abajo como **repository variables** y `OLLAMA_URL` como **secret**,
-porque es el unico que nombra infraestructura.
+Todo por variables de entorno, ver `.env.example`. Copia ese archivo a `.env`
+(está en `.gitignore` y no debe subirse). Los secretos no van en archivos
+versionados. En GitHub, los valores no sensibles pueden ser repository variables;
+`OLLAMA_URL` (nombra infraestructura interna) y `POSTGRES_PASSWORD` (contraseña
+rotada de Postgres) son **secrets**. El workflow de despliegue lee
+`secrets.POSTGRES_PASSWORD` y `docker-compose.portal.yml` la interpola en
+`DATABASE_URL`.
 
 ```bash
-gh variable list --repo diegoperezg7/ai-mastery-hub
-gh secret list   --repo diegoperezg7/ai-mastery-hub
+gh variable list --repo diegoperezg7/ai-learn
+gh secret list   --repo diegoperezg7/ai-learn
 ```
 
 
 | Variable | Por defecto | Para qué |
 |---|---|---|
+| `POSTGRES_PASSWORD` | placeholder en `.env.example`; obligatorio en el portal | Contraseña de Postgres en `supabase-db`. No va en git |
+| `DATABASE_URL` | `sqlite:////app/data/hub.db` en el compose local | URL que recibe la API. En el portal se construye con `POSTGRES_PASSWORD` |
+| `DATABASE_SCHEMA` | `public` (local) / `ai_learn` (portal) | Esquema de la base |
 | `WEB_PORT` | `5183` | Puerto expuesto del frontend |
 | `REQUIRE_PORTAL_AUTH` | `false` | `true` detrás del auth-proxy |
 | `SPRINT_START` | `2026-08-21` | Inicio del sprint |
