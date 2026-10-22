@@ -1,8 +1,8 @@
 <div align="center">
 <img src="frontend/public/assets/ai-learn-wordmark.png" width="520" alt="AI-Learn">
 
-**El sistema operativo de mi carrera técnica como AI Engineer.**
-Qué toca hoy, cuánto llevo de verdad, qué skills flojean y un currículum que solo crece con evidencia.
+**The operating system for my technical career as an AI Engineer.**
+What is due today, how much progress is real, which skills are weak, and a résumé that only grows with evidence.
 
 <img src="https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
 <img src="https://img.shields.io/badge/FastAPI-0.120-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI">
@@ -18,108 +18,124 @@ Qué toca hoy, cuánto llevo de verdad, qué skills flojean y un currículum que
 <img src="https://img.shields.io/badge/Ollama-local-000000?style=flat-square&logo=ollama&logoColor=white" alt="Ollama">
 <img src="https://img.shields.io/badge/Recharts-3.10-22B5BF?style=flat-square" alt="Recharts">
 <img src="https://img.shields.io/badge/Zustand-5-443E38?style=flat-square" alt="Zustand">
-<img src="https://img.shields.io/badge/CSS-sin_Tailwind-1572B6?style=flat-square&logo=css&logoColor=white" alt="CSS propio">
+<img src="https://img.shields.io/badge/CSS-no_Tailwind-1572B6?style=flat-square&logo=css&logoColor=white" alt="Custom CSS">
 
 </div>
 
 ---
 
-## Por qué existe
+## What this demonstrates
 
-No es un gestor de tareas ni una lista de cursos. Es la herramienta de uso diario del
-**AI Engineer Mastery Roadmap 2026**: 12 semanas de sprint (21 ago → 29 nov) más una fase
-de modelos hasta el 31 de diciembre, a **6 h por semana**, con un día libre obligatorio.
+A self-hosted learning system for an AI engineering roadmap. The UI is available in **Spanish and English**.
 
-Tres reglas que la aplicación hace cumplir por diseño:
+- **FastAPI + SQLAlchemy 2 typed API.** Pydantic v2 schemas, `response_model` contracts, and SQLAlchemy 2 queries (`select()`, `Mapped` relationships).
+- **React 19 + TypeScript strict.** Vite 6, `strict` plus unused-symbol checks, Zustand for theme and language.
+- **Docker multi-stage.** The frontend image builds with Node and serves the SPA from nginx. Compose runs the API and the web container.
+- **SSO forward-auth.** Behind the proxy, the API requires the `X-Auth-*` headers the proxy injects. Local development stays a single-user app with no login screen.
+- **Local LLM coach via Ollama.** Three roles — coach, interviewer, and code reviewer — that explain, question, and review. The training prompt refuses to write the solution.
+- **Spaced repetition.** When a question is marked both explainable and implementable, the review interval doubles with a floor of 3 days. If either check fails, the interval resets to 1 day.
 
-| Regla | Cómo la aplica la app |
+---
+
+## Why it exists
+
+This is not a task manager or a course list. It is the daily tool for the
+**AI Engineer Mastery Roadmap 2026**: a 12-week sprint (21 Aug → 29 Nov) plus a
+models phase through 31 December, at **6 hours per week**, with one mandatory day off.
+
+Three rules the application enforces by design:
+
+| Rule | How the app applies it |
 |---|---|
-| **La unidad de trabajo es la sesión, no la tarea** | 95 sesiones concretas repartidas por día, cada una con su alcance exacto y dónde parar. "Aprender RAG" no dice qué hacer un martes; "Módulo 2, primera mitad, hasta terminar BM25" sí |
-| **Evidencia, no cursos terminados** | Cada skill tiene su `Completion Criteria`. El nivel sube por lo que construyes, y solo entonces el CV propone una línea nueva |
-| **Consistencia, no burnout** | 6 h/semana repartidas en 45/60/45/60/120 min + review. Si registras 7 días seguidos, la app te avisa de que descanses |
+| **The unit of work is the session, not the task** | 95 concrete sessions laid out by day, each with an exact scope and a stopping point. "Learn RAG" does not say what to do on a Tuesday; "Module 2, first half, stop when BM25 is done" does |
+| **Evidence, not finished courses** | Every skill has `Completion Criteria`. The level rises from what you build, and only then does the résumé propose a new line |
+| **Consistency, not burnout** | 6 h/week split into 45/60/45/60/120 min plus a review. If you log 7 days in a row, the app tells you to rest |
 
 <div align="center">
-<img src="docs/dashboard-light.png" width="49%" alt="Dashboard en claro">
-<img src="docs/dashboard-dark.png" width="49%" alt="Dashboard en oscuro">
+<img src="docs/dashboard-light.png" width="49%" alt="Dashboard, light theme">
+<img src="docs/dashboard-dark.png" width="49%" alt="Dashboard, dark theme">
 </div>
 
 ---
 
-## Qué hace
+## What it does
 
-| Área | Detalle |
+| Area | Detail |
 |---|---|
-| **Dashboard** | Abre con la sesión de hoy y su alcance exacto. Debajo: horas de la semana, ritmo, racha, días al deadline y lo que queda de semana |
-| **Plan diario** | 95 sesiones sobre el calendario real. Marcar una sesión registra sus minutos automáticamente |
-| **Roadmap** | Ordenado por semanas, S1 primero, con el plan día a día dentro de cada una. Pestañas aparte para diciembre y para lo opcional |
-| **Gráficos** | Horas por semana, acumulado vs plan, radar de nivel por pilar, donut de reparto, entrevistas por área y práctica vs teoría |
-| **Timeline** | Gantt de agosto a diciembre con línea de "hoy" |
-| **Calendario** | Mes navegable; al pulsar un día salen sus sesiones |
-| **Skills** | 30 competencias con descripción, por qué importa, criterio de completion, nivel 0–5, evidencia y logo oficial |
-| **Recursos** | 23 recursos verificados con logo, precio, horas reales y veredicto de por qué entra o se descarta |
-| **Entrevistas** | 60 preguntas con doble check (*sé explicarlo* / *sé implementarlo*) y repetición espaciada |
-| **Currículum** | CV vivo en markdown. Propone líneas cuando hay evidencia real; nada entra sin que lo aceptes |
-| **Reviews** | Una entrada por semana con horas reales vs objetivo |
-| **Coach IA** | Ollama local en tres roles: coach, entrevistador y code reviewer. Nunca escribe la solución |
-| **Notificaciones** | Deadlines, atrasos, ritmo, review pendiente, hitos de racha y aviso de descanso |
+| **Dashboard** | Opens on today's session and its exact scope. Below: hours this week, pace, streak, days to the deadline, and what is left in the week |
+| **Daily plan** | 95 sessions on the real calendar. Completing a session logs its minutes automatically |
+| **Roadmap** | Ordered by week, S1 first, with the day-by-day plan inside each week. Separate tabs for December and for optional work |
+| **Charts** | Hours per week, cumulative vs plan, skill-level radar by pillar, distribution donut, interviews by area, and practice vs theory |
+| **Timeline** | Gantt from August to December with a "today" line |
+| **Calendar** | Navigable month; selecting a day shows its sessions |
+| **Skills** | 31 skills with a description, why it matters, completion criteria, level 0–5, evidence, and an official logo |
+| **Resources** | 25 checked resources with logo, price, real hours, and a verdict on why each one is in or out |
+| **Interviews** | 60 questions with a double check (*I can explain it* / *I can implement it*) and spaced repetition |
+| **Résumé** | Living CV in markdown. Proposes lines when there is real evidence; nothing is added until you accept it |
+| **Reviews** | One entry per week with actual hours vs the target |
+| **AI coach** | Local Ollama in three roles: coach, interviewer, and code reviewer. It never writes the solution |
+| **Notifications** | Deadlines, overdue work, pace, a pending review, streak milestones, and a rest reminder |
 
-Todo en **español e inglés**, con **tema claro/oscuro** y **responsive** para usarla desde el móvil.
+The interface is in **Spanish and English**, with a **light/dark theme** and a **responsive** layout for mobile.
 
 <div align="center">
-<img src="docs/progress-dark.png" width="62%" alt="Gráficos">
-<img src="docs/mobile-dark.png" width="18%" alt="Vista móvil">
+<img src="docs/progress-dark.png" width="62%" alt="Charts">
+<img src="docs/mobile-dark.png" width="18%" alt="Mobile view">
 </div>
 
 ---
 
-## Arquitectura
+## Architecture
+
+The public deployment is my self-hosted home server behind Cloudflare Tunnel + Caddy + SSO.
 
 ```mermaid
 flowchart LR
-    subgraph cliente[" "]
-        NAV["Navegador · escritorio y móvil"]
+    subgraph client[" "]
+        NAV["Browser · desktop and mobile"]
     end
 
-    subgraph portal["Mac Mini · darc3.com"]
+    subgraph portal["Self-hosted home server"]
         CF["Cloudflare Tunnel"] --> CADDY["Caddy · forward_auth"]
-        CADDY --> SSO["AIdentity SSO<br/>inyecta X-Auth-User / Email / Role"]
+        CADDY --> SSO["SSO<br/>injects X-Auth-User / Email / Role"]
     end
 
     subgraph stack["docker compose"]
         WEB["hub-web<br/>nginx + React SPA"]
         API["hub-api<br/>FastAPI"]
-        DB[("SQLite · volumen hub-data<br/>WAL + foreign keys")]
+        DB[("SQLite · hub-data volume<br/>WAL + foreign keys")]
     end
 
-    OLLAMA["Ollama en el host<br/>coach / entrevistador / reviewer"]
+    OLLAMA["Ollama on the host<br/>coach / interviewer / reviewer"]
 
     NAV --> CF
-    NAV -.->|LAN o Tailscale| WEB
+    NAV -.->|LAN or Tailscale| WEB
     SSO --> WEB
     WEB -->|proxy /api| API
     API --> DB
-    API -.->|opcional| OLLAMA
+    API -.->|optional| OLLAMA
 ```
 
-- **hub-web** sirve el build estático y hace de proxy de `/api` hacia `hub-api`, así que el
-  navegador solo habla con un origen y no hay CORS en producción.
-- **hub-api** no se expone al exterior: solo es alcanzable dentro de la red de compose.
-- Detrás del portal, la API **exige** las cabeceras `X-Auth-*` que inyecta AIdentity.
+- **hub-web** serves the static build and proxies `/api` to `hub-api`, so the
+  browser talks to a single origin and production does not need CORS.
+- **hub-api** is not published on the host: it is only reachable on the Compose network.
+- Behind the portal, the API **requires** the `X-Auth-*` headers injected by the SSO proxy.
+- Local Compose uses SQLite. The portal override points the API at Postgres and does not store the password in git.
 
-### Modelo de datos
+### Data model
 
 ```mermaid
 erDiagram
-    SKILL      ||--o{ TASK          : "se demuestra con"
-    SKILL      ||--o{ RESOURCE      : "se estudia con"
-    SKILL      ||--o{ INTERVIEW_Q   : "se pregunta en"
-    TASK       ||--o{ CHECKLIST     : "se trocea en"
-    TASK       ||--o{ DAY_PLAN      : "se planifica como"
-    TASK       ||--o{ STUDY_SESSION : "consume"
-    RESOURCE   ||--o{ DAY_PLAN      : "alimenta"
-    DAY_PLAN   ||--o| STUDY_SESSION : "al completarse registra"
-    WEEK_REVIEW ||--o{ STUDY_SESSION : "agrega"
-    CV_DOC     ||--o{ CV_SUGGESTION : "recibe"
+    SKILL      ||--o{ TASK          : "demonstrated by"
+    SKILL      ||--o{ RESOURCE      : "studied with"
+    SKILL      ||--o{ INTERVIEW_Q   : "asked in"
+    TASK       ||--o{ CHECKLIST     : "split into"
+    TASK       ||--o{ DAY_PLAN      : "scheduled as"
+    TASK       ||--o{ STUDY_SESSION : "consumes"
+    RESOURCE   ||--o{ DAY_PLAN      : "feeds"
+    DAY_PLAN   ||--o| STUDY_SESSION : "logs when completed"
+    WEEK_REVIEW ||--o{ STUDY_SESSION : "aggregates"
+    CV_DOC     ||--o{ CV_SUGGESTION : "receives"
 
     SKILL {
         int id
@@ -167,10 +183,10 @@ erDiagram
     }
 ```
 
-> **Una sola fuente de verdad para las horas: `study_sessions`.** Ritmo, racha, gráficos y
-> reviews se derivan de ahí. Ninguna pantalla guarda su propio contador.
+> **One source of truth for hours: `study_sessions`.** Pace, streak, charts, and
+> reviews are all derived from it. No screen keeps its own counter.
 
-### El calendario del sprint
+### Sprint calendar
 
 ```mermaid
 gantt
@@ -186,8 +202,8 @@ gantt
     S5  Software Design + FastAPI    :2026-09-17, 7d
     S6  Backend + Reliability        :2026-09-24, 7d
 
-    section Pausa
-    Tailandia + Vietnam              :crit, 2026-10-01, 18d
+    section Break
+    Planned break                    :crit, 2026-10-01, 18d
 
     section Sprint 12w
     S7  LangGraph                    :2026-10-19, 7d
@@ -195,47 +211,47 @@ gantt
     S9  Cloud + Containers           :2026-11-02, 7d
     S10 CI/CD + Observability        :2026-11-09, 7d
     S11 Evals + LLMOps               :2026-11-16, 7d
-    S12 Consolidación                :2026-11-23, 7d
+    S12 Consolidation                :2026-11-23, 7d
 
     section Models
-    Diciembre  Models & Advanced AI  :2026-11-30, 32d
+    December  Models & Advanced AI   :2026-11-30, 32d
 ```
 
 ---
 
 ## Stack
 
-| Capa | Tecnología | Por qué |
+| Layer | Technology | Why |
 |:--|:--|:--|
-| <img src="https://cdn.simpleicons.org/fastapi/009688" width="16"> **API** | FastAPI + Pydantic v2 | Contrato tipado y `/docs` gratis |
-| <img src="https://cdn.simpleicons.org/sqlalchemy/D71F00" width="16"> **ORM** | SQLAlchemy 2.0 | Estilo `select()` moderno, sin *legacy Query* |
-| <img src="https://cdn.simpleicons.org/sqlite/003B57" width="16"> **DB** | SQLite con WAL | Un solo usuario. Postgres sería sobreingeniería |
+| <img src="https://cdn.simpleicons.org/fastapi/009688" width="16"> **API** | FastAPI + Pydantic v2 | Typed contract and free `/docs` |
+| <img src="https://cdn.simpleicons.org/sqlalchemy/D71F00" width="16"> **ORM** | SQLAlchemy 2.0 | Modern `select()` style, no legacy Query |
+| <img src="https://cdn.simpleicons.org/sqlite/003B57" width="16"> **DB** | SQLite with WAL | Local single-user default. The portal override uses Postgres |
 | <img src="https://cdn.simpleicons.org/react/61DAFB" width="16"> **UI** | React 19 + react-router 7 | — |
 | <img src="https://cdn.simpleicons.org/vite/646CFF" width="16"> **Build** | Vite 6 + TypeScript strict | — |
-| **Estado** | Zustand 5 con `persist` | Tema e idioma sobreviven al reload |
-| **Gráficos** | Recharts 3 | Composable y sin canvas |
-| <img src="https://cdn.simpleicons.org/css/1572B6" width="16"> **Estilos** | CSS propio con variables | **Sin Tailwind**, por decisión |
-| <img src="https://cdn.simpleicons.org/simpleicons/111111" width="16"> **Logos** | simple-icons + lucide-react | SVG de una ruta y sin fondo; lucide para los conceptos abstractos |
-| <img src="https://cdn.simpleicons.org/docker/2496ED" width="16"> **Runtime** | Docker Compose multi-stage | — |
-| <img src="https://cdn.simpleicons.org/nginx/009639" width="16"> **Servidor** | nginx alpine | Sirve el SPA y proxya `/api` |
-| <img src="https://cdn.simpleicons.org/ollama/000000" width="16"> **LLM** | Ollama en el host | Local, sin coste y sin salir de casa |
+| **State** | Zustand 5 with `persist` | Theme and language survive reload |
+| **Charts** | Recharts 3 | Composable, no canvas |
+| <img src="https://cdn.simpleicons.org/css/1572B6" width="16"> **Styles** | Custom CSS with variables | **No Tailwind**, on purpose |
+| <img src="https://cdn.simpleicons.org/simpleicons/111111" width="16"> **Logos** | simple-icons + lucide-react | Single-path SVG, no background; lucide for abstract concepts |
+| <img src="https://cdn.simpleicons.org/docker/2496ED" width="16"> **Runtime** | Docker Compose, multi-stage frontend image | — |
+| <img src="https://cdn.simpleicons.org/nginx/009639" width="16"> **Server** | nginx alpine | Serves the SPA and proxies `/api` |
+| <img src="https://cdn.simpleicons.org/ollama/000000" width="16"> **LLM** | Ollama on the host | Local, no per-token cost, no external API |
 
 ---
 
-## Arranque
+## Getting started
 
-### Docker (lo normal)
+### Docker (the usual path)
 
 ```bash
 cp .env.example .env
 docker compose up -d --build
 ```
 
-Abre **http://localhost:5183**. Los datos persisten en el volumen `hub-data`.
+Open **http://localhost:5183**. Data persists in the `hub-data` volume.
 
-### Desarrollo local
+### Local development
 
-Requiere Python 3.12+ y Node 20+.
+Requires Python 3.12+ and Node 20+.
 
 ```bash
 # Backend
@@ -244,63 +260,65 @@ python3 -m venv .venv
 ./.venv/bin/pip install -r requirements.txt
 ./.venv/bin/uvicorn app.main:app --reload --port 8183
 
-# Frontend (otra terminal)
+# Frontend (another terminal)
 cd frontend
 npm install
 npm run dev
 ```
 
-| Servicio | URL |
+| Service | URL |
 |---|---|
 | Frontend | http://localhost:5183 |
 | API | http://localhost:8183/api/health |
 | OpenAPI | http://localhost:8183/docs |
 
-La base de datos se crea sola en `backend/data/hub.db` y se siembra en el primer arranque.
-El seed es **idempotente**: reiniciar no duplica nada.
+The database is created at `backend/data/hub.db` and seeded on first boot.
+The seed is **idempotent**: restarting does not duplicate rows.
 
-### Despliegue en el Mac Mini (portal darc3)
+### Deploy on the self-hosted home server
+
+My self-hosted home server behind Cloudflare Tunnel + Caddy + SSO.
 
 ```mermaid
 sequenceDiagram
-    participant U as Navegador
+    participant U as Browser
     participant CF as Cloudflare Tunnel
     participant C as Caddy
-    participant A as AIdentity
+    participant A as SSO
     participant W as hub-web
     participant API as hub-api
 
-    U->>CF: GET hub.darc3.com
-    CF->>C: reenvía
+    U->>CF: GET hub.example.com
+    CF->>C: forwards
     C->>A: forward_auth
     A-->>C: 200 + X-Auth-User / Email / Role
-    C->>W: request con cabeceras
+    C->>W: request with headers
     W->>API: proxy /api/*
-    API-->>W: 200 (o 401 si faltan cabeceras)
-    W-->>U: SPA + datos
+    API-->>W: 200 (or 401 if the headers are missing)
+    W-->>U: SPA + data
 ```
 
 ```bash
-cp .env.example .env   # si aún no existe
-# Edita POSTGRES_PASSWORD en .env con la contraseña ya rotada. No la subas al repo.
+cp .env.example .env   # if it does not exist yet
+# Set POSTGRES_PASSWORD in .env to the rotated password. Do not commit it.
 docker compose -f docker-compose.yml -f docker-compose.portal.yml up -d --build
 /add-to-portal
 ```
 
-El override conecta ambos contenedores a la red `auth-proxy_default` y activa
-`REQUIRE_PORTAL_AUTH=true`. El último paso, dar de alta el public hostname `hub.darc3.com`
-en Cloudflare Zero Trust, **es manual**.
+The override attaches both containers to the proxy network and sets
+`REQUIRE_PORTAL_AUTH=true`. The last step, registering the public hostname
+(`hub.example.com` in the diagram) in Cloudflare Zero Trust, **is manual**.
 
 ---
 
-## Configuración
+## Configuration
 
-Todo por variables de entorno, ver `.env.example`. Copia ese archivo a `.env`
-(está en `.gitignore` y no debe subirse). Los secretos no van en archivos
-versionados. En GitHub, los valores no sensibles pueden ser repository variables;
-`OLLAMA_URL` (nombra infraestructura interna) y `POSTGRES_PASSWORD` (contraseña
-rotada de Postgres) son **secrets**. El workflow de despliegue lee
-`secrets.POSTGRES_PASSWORD` y `docker-compose.portal.yml` la interpola en
+Everything is configured with environment variables. See `.env.example`. Copy that
+file to `.env` (it is in `.gitignore` and must not be committed). Secrets do not
+belong in versioned files. On GitHub, non-sensitive values can be repository
+variables; `OLLAMA_URL` (it names internal infrastructure) and `POSTGRES_PASSWORD`
+(the rotated Postgres password) are **secrets**. The deploy workflow reads
+`secrets.POSTGRES_PASSWORD`, and `docker-compose.portal.yml` interpolates it into
 `DATABASE_URL`.
 
 ```bash
@@ -309,87 +327,87 @@ gh secret list   --repo diegoperezg7/ai-learn
 ```
 
 
-| Variable | Por defecto | Para qué |
+| Variable | Default | Purpose |
 |---|---|---|
-| `POSTGRES_PASSWORD` | placeholder en `.env.example`; obligatorio en el portal | Contraseña de Postgres en `supabase-db`. No va en git |
-| `DATABASE_URL` | `sqlite:////app/data/hub.db` en el compose local | URL que recibe la API. En el portal se construye con `POSTGRES_PASSWORD` |
-| `DATABASE_SCHEMA` | `public` (local) / `ai_learn` (portal) | Esquema de la base |
-| `WEB_PORT` | `5183` | Puerto expuesto del frontend |
-| `REQUIRE_PORTAL_AUTH` | `false` | `true` detrás del auth-proxy |
-| `SPRINT_START` | `2026-08-21` | Inicio del sprint |
-| `CORE_DEADLINE` | `2026-11-29` | Cierre del núcleo (con la pausa de Tailandia + Vietnam, 1–18 oct) |
-| `FINAL_DEADLINE` | `2026-12-31` | Fin de la fase de modelos |
-| `WEEKLY_TARGET_HOURS` | `6` | Objetivo semanal |
-| `COACH_ENABLED` | `true` | Activa el coach |
-| `OLLAMA_URL` | `http://host.docker.internal:11434` | Ollama del host |
-| `OLLAMA_MODEL` | `qwen2.5:7b` | Modelo del coach |
+| `POSTGRES_PASSWORD` | placeholder in `.env.example`; required on the portal | Postgres password for the portal database. Not stored in git |
+| `DATABASE_URL` | `sqlite:////app/data/hub.db` in local Compose | URL the API receives. On the portal it is built with `POSTGRES_PASSWORD` |
+| `DATABASE_SCHEMA` | `public` (local) / `ai_learn` (portal) | Database schema |
+| `WEB_PORT` | `5183` | Published frontend port |
+| `REQUIRE_PORTAL_AUTH` | `false` | `true` behind the auth proxy |
+| `SPRINT_START` | `2026-08-21` | Sprint start |
+| `CORE_DEADLINE` | `2026-11-29` | End of the core sprint, including a planned break (1–18 Oct) |
+| `FINAL_DEADLINE` | `2026-12-31` | End of the models phase |
+| `WEEKLY_TARGET_HOURS` | `6` | Weekly target |
+| `COACH_ENABLED` | `true` | Turns the coach on |
+| `OLLAMA_URL` | `http://host.docker.internal:11434` | Ollama on the host |
+| `OLLAMA_MODEL` | `qwen2.5:7b` | Coach model |
 
 ---
 
 ## API
 
-Todo bajo el prefijo `/api`. Lo más usado:
+Everything is under the `/api` prefix. The routes used most often:
 
-| Método | Ruta | Qué hace |
+| Method | Path | What it does |
 |---|---|---|
-| `GET` | `/dashboard` | El agregado que pinta la portada: hoy, ritmo, racha, horas por semana |
-| `GET` | `/days?start=&end=` | Sesiones del rango |
-| `POST` | `/days/{id}/complete` | Marca la sesión **y registra sus minutos**, en una sola llamada |
-| `GET · POST` | `/sessions` | Horas registradas a mano |
-| `GET` | `/sessions/heatmap` | Actividad por día |
-| `GET · PATCH` | `/skills` · `/skills/{id}` | Nivel y evidencia; el estado se deriva del nivel |
-| `GET · PATCH` | `/tasks` · `/tasks/{id}` | Estado, foco del día, horas |
-| `PATCH` | `/questions/{id}` | Doble check y reprogramación de la repetición espaciada |
-| `GET · PUT` | `/cv` | CV vivo en markdown |
-| `POST` | `/cv/suggestions/sync` | Busca evidencia nueva y propone líneas |
-| `POST` | `/coach/chat` | Coach local, en modo entrenamiento |
-| `POST` | `/notifications/refresh` | Reevalúa las 7 reglas |
+| `GET` | `/dashboard` | The aggregate that paints the home screen: today, pace, streak, hours per week |
+| `GET` | `/days?start=&end=` | Sessions in the range |
+| `POST` | `/days/{id}/complete` | Marks the session **and logs its minutes**, in one call |
+| `GET · POST` | `/sessions` | Hours logged by hand |
+| `GET` | `/sessions/heatmap` | Activity by day |
+| `GET · PATCH` | `/skills` · `/skills/{id}` | Level and evidence; status is derived from the level |
+| `GET · PATCH` | `/tasks` · `/tasks/{id}` | Status, today's focus, hours |
+| `PATCH` | `/questions/{id}` | Double check and rescheduling of spaced repetition |
+| `GET · PUT` | `/cv` | Living CV in markdown |
+| `POST` | `/cv/suggestions/sync` | Looks for new evidence and proposes lines |
+| `POST` | `/coach/chat` | Local coach, in training mode |
+| `POST` | `/notifications/refresh` | Re-evaluates the 7 rules |
 
-Contrato completo en `/docs`.
+Full contract at `/docs`.
 
 ---
 
-## Metodología
+## Method
 
-Práctica deliberada (Ericsson) + *retrieval practice* + repetición espaciada.
+Deliberate practice (Ericsson) + retrieval practice + spaced repetition.
 
 ```mermaid
 flowchart LR
-    P["Sesión con alcance cerrado"] --> H["Registra minutos"]
-    H --> E{"¿Hay entregable?"}
-    E -->|sí| S["Sube el nivel de la skill"]
+    P["Session with a closed scope"] --> H["Log minutes"]
+    H --> E{"Is there a deliverable?"}
+    E -->|yes| S["Raise the skill level"]
     E -->|no| P
-    S --> C["El CV propone una línea"]
-    C --> A{"¿La aceptas?"}
-    A -->|sí| CV["Entra en el currículum"]
-    A -->|no| X["Se descarta"]
+    S --> C["The CV proposes a line"]
+    C --> A{"Do you accept it?"}
+    A -->|yes| CV["It enters the résumé"]
+    A -->|no| X["It is discarded"]
     H --> R["Weekly Review"]
     R --> P
 ```
 
-**Repetición espaciada de las 60 preguntas**: si puedes explicarla *e* implementarla, el
-intervalo se duplica; si fallas cualquiera de las dos, vuelve mañana y el intervalo se
-reinicia a 1 día.
+**Spaced repetition for the 60 questions**: if you can explain it *and* implement it,
+the interval doubles (floor of 3 days). If either check fails, it is due tomorrow and
+the interval resets to 1 day.
 
-**Modos de trabajo**. En *PRODUCTION* la IA escribe código sin límite. En *TRAINING* —el
-modo del coach de esta app— la IA explica, pregunta, revisa y hace de entrevistador, pero
-**nunca** escribe la solución. La dinámica es *yo pienso → yo escribo → la IA revisa*.
+**Working modes.** In *PRODUCTION* the AI writes code without a limit. In *TRAINING* —
+the mode of this app's coach — the AI explains, asks questions, reviews, and interviews,
+but it **never** writes the solution. The loop is *I think → I write → the AI reviews*.
 
 ---
 
-## Estructura
+## Layout
 
 ```
 backend/app/
-  main.py            arranque, CORS, routers, seed en el lifespan
-  config.py          settings por entorno
-  models.py          15 tablas
-  schemas.py         contrato de la API
-  dependencies.py    auth por cabeceras del portal
-  seed_plan.py       17 semanas, 74 tareas, 60 preguntas
-  seed_days.py       95 sesiones diarias con su alcance
-  seed_data.py       30 skills y 23 recursos
-  seed.py            siembra idempotente
+  main.py            startup, CORS, routers, seed in the lifespan
+  config.py          settings from the environment
+  models.py          SQLAlchemy models
+  schemas.py         API contract
+  dependencies.py    auth from the portal headers
+  seed_plan.py       weeks, tasks, and interview questions
+  seed_days.py       daily sessions and their scope
+  seed_data.py       skills and resources
+  seed.py            idempotent seed
   routers/           skills · tasks · tracking · growth
   services/          progress · cv_builder · notifier · coach
 frontend/src/
@@ -397,45 +415,47 @@ frontend/src/
                      Interview · CV · Reviews · Coach
   components/        ui.tsx · TaskCard.tsx · DaySession.tsx · charts.tsx
   lib/               api.ts · logos.tsx
-  store/             zustand (prefs + datos)
+  store/             zustand (prefs + data)
   i18n/              ES / EN
   styles/            tokens.css · global.css
-docs/                capturas del README
+docs/                README screenshots
 ```
 
 ---
 
-## Currículum
+## Résumé
 
-En el primer arranque el CV se importa de la primera fuente que exista:
+On first boot the CV is imported from the first source that exists:
 
-1. `/app/import/cv.md` (montado desde `backend/import/`)
+1. `/app/import/cv.md` (mounted from `backend/import/`)
 2. `~/career-ops/cv.md`
-3. Una plantilla vacía
+3. An empty template
 
-> El CV real **no está en el repo** (`backend/import/cv.md` está en `.gitignore`). Deja ahí
-> tu markdown antes del primer arranque y la app lo adopta.
+> The real CV **is not in the repo** (`backend/import/cv.md` is in `.gitignore`). Put
+> your markdown there before the first boot and the app adopts it.
 
-A partir de ahí vive en la base de datos. La app propone líneas nuevas cuando una skill
-llega a nivel 4+ o *Interview Ready*, o cuando completas una tarea con entregable.
-**Nada entra en el CV sin que lo aceptes.**
+From then on it lives in the database. The app proposes new lines when a skill
+reaches level 4+ or *Interview Ready*, or when you complete a task that has a deliverable.
+**Nothing enters the CV until you accept it.**
 
 ---
 
-## Notas y gotchas
+## Notes and gotchas
 
-- **La distribución por pilar se calcula solo sobre el sprint de 12 semanas**, que es donde
-  aplica el reparto 40 / 30 / 20 / 10. Diciembre es deliberadamente *Models* y desvirtuaría
-  el dato; las tareas de relleno opcional tampoco cuentan.
-- **`seed_days` corta si ya hay filas en `day_plans`.** Para resembrar el plan diario hay que
-  borrarlas primero y después reiniciar el contenedor.
-- **nginx tiene que escuchar también en IPv6** (`listen [::]:80`). Dentro del contenedor
-  `localhost` resuelve antes a `::1`, así que sin eso el healthcheck falla aunque la web
-  responda perfectamente.
-- **Recharts necesita colores reales, no `var(--accent)`.** Por eso existe `useChartTheme()`.
-- **Python 3.14 todavía no tiene wheels de pydantic-core** en algunas versiones; la imagen usa
-  `python:3.12-slim` para no compilar nada.
-- El pipeline de CI de este repo **no está hecho a propósito**: escribirlo a mano es el
-  ejercicio de la semana 1 del roadmap.
-- Si no registras horas, ni el ritmo ni la racha ni los gráficos significan nada. Empieza
-  marcando la sesión del día.
+- **Pillar distribution is calculated only on the 12-week sprint**, which is where
+  the 40 / 30 / 20 / 10 split applies. December is deliberately *Models* and would
+  distort the figure; optional filler tasks do not count either.
+- **`seed_days` stops if `day_plans` already has rows.** To reseed the daily plan,
+  delete those rows first and then restart the container.
+- **nginx must also listen on IPv6** (`listen [::]:80`). Inside the container
+  `localhost` resolves to `::1` first, so without that the healthcheck fails even
+  when the site responds fine.
+- **Recharts needs real colors, not `var(--accent)`.** That is why `useChartTheme()` exists.
+- **Python 3.14 still has no pydantic-core wheels** on some versions; the image uses
+  `python:3.12-slim` so nothing has to be compiled.
+- **CI validates pull requests on GitHub-hosted runners.** `npm ci`, the frontend
+  build, and `docker compose config` run on `ubuntu-latest`. The production deploy
+  stays on the self-hosted runner and only runs for this repository, on push to
+  `main` or manual dispatch.
+- If you do not log hours, pace, streak, and charts mean nothing. Start by
+  marking today's session.
