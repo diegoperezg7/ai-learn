@@ -302,7 +302,6 @@ sequenceDiagram
 cp .env.example .env   # if it does not exist yet
 # Set POSTGRES_PASSWORD in .env to the rotated password. Do not commit it.
 docker compose -f docker-compose.yml -f docker-compose.portal.yml up -d --build
-/add-to-portal
 ```
 
 The override attaches both containers to the proxy network and sets
@@ -389,9 +388,8 @@ flowchart LR
 the interval doubles (floor of 3 days). If either check fails, it is due tomorrow and
 the interval resets to 1 day.
 
-**Working modes.** In *PRODUCTION* the AI writes code without a limit. In *TRAINING* —
-the mode of this app's coach — the AI explains, asks questions, reviews, and interviews,
-but it **never** writes the solution. The loop is *I think → I write → the AI reviews*.
+**Training mode.** The coach explains, asks questions, reviews and interviews, but it
+**never** writes the solution. The loop is *I think → I write → the coach reviews*.
 
 ---
 
@@ -428,8 +426,8 @@ docs/                README screenshots
 On first boot the CV is imported from the first source that exists:
 
 1. `/app/import/cv.md` (mounted from `backend/import/`)
-2. `~/career-ops/cv.md`
-3. An empty template
+2. `backend/import/cv.md` when the API runs outside Docker
+3. A starter template
 
 > The real CV **is not in the repo** (`backend/import/cv.md` is in `.gitignore`). Put
 > your markdown there before the first boot and the app adopts it.
@@ -455,7 +453,16 @@ reaches level 4+ or *Interview Ready*, or when you complete a task that has a de
   `python:3.12-slim` so nothing has to be compiled.
 - **CI validates pull requests on GitHub-hosted runners.** `npm ci`, the frontend
   build, and `docker compose config` run on `ubuntu-latest`. The production deploy
-  stays on the self-hosted runner and only runs for this repository, on push to
-  `main` or manual dispatch.
+  stays on the self-hosted runner and only runs for this repository on `main`:
+  on push, or on a manual dispatch started by the owner. Pull requests and forks
+  never reach it.
 - If you do not log hours, pace, streak, and charts mean nothing. Start by
   marking today's session.
+
+---
+
+## License
+
+Copyright (c) 2026 Diego Pérez. All rights reserved.
+
+Published for portfolio and evaluation purposes only. You may read the code to evaluate the author's work; copying, modifying, distributing or using it requires written permission. See [LICENSE](LICENSE).

@@ -28,8 +28,13 @@ jobs:
         run: docker compose config
 
   deploy:
-    # Production only: push to main or workflow_dispatch, and only in this repository.
-    if: github.event_name != 'pull_request' && github.repository_owner == 'diegoperezg7' && github.ref == 'refs/heads/main'
+    # Production only, from the canonical repository on main: on push, or a manual
+    # run started by the owner. Pull requests and forks never reach this runner.
+    if: >-
+      github.repository == 'diegoperezg7/ai-learn' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' ||
+       (github.event_name == 'workflow_dispatch' && github.actor == github.repository_owner))
     needs: validate
     runs-on: self-hosted
 

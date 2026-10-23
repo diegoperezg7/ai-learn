@@ -28,7 +28,6 @@ WEEK_BOUNDS: dict[int, tuple[str, str]] = {n: (s, e) for _, n, s, e, _ in WEEKS 
 
 CV_SOURCES = [
     Path("/app/import/cv.md"),
-    Path.home() / "career-ops" / "cv.md",
     Path(__file__).resolve().parents[2] / "import" / "cv.md",
 ]
 
