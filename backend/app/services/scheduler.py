@@ -111,7 +111,9 @@ def regenerate(db: Session, mode: str = "from_today") -> RegenerateResult:
     for task in tasks:
         tasks_by_week.setdefault(task.week, []).append(task)
 
-    cursor = cfg.start_date if mode == "full" else ref
+    # ``full`` always lays from start_date. ``from_today`` recompacts from today,
+    # but honours a start_date set in the future (e.g. "restart from tomorrow").
+    cursor = cfg.start_date if mode == "full" else max(ref, cfg.start_date)
 
     for review in weeks:
         number = review.week_number
