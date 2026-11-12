@@ -2,7 +2,7 @@ from datetime import date
 from unittest import TestCase
 
 from app.models import DayPlan
-from app.routers.tracking import _adaptive_dates
+from app.services.scheduler import adaptive_dates as _adaptive_dates
 
 
 def plan(plan_id: int, day: date, slot: int = 0, done: bool = False) -> DayPlan:

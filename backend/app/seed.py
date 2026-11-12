@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 from .models import (
     ChecklistItem,
     DayPlan,
+    DayPlanActivity,
     CVDocument,
     InterviewQuestion,
     Resource,
@@ -134,7 +135,7 @@ def seed_tasks(db: Session, skills: dict[str, Skill], resources: dict[str, Resou
 
 def seed_reviews(db: Session) -> None:
     existing = {r.label for r in db.scalars(select(WeeklyReview)).all()}
-    for label, number, start, end, phase in WEEKS:
+    for order, (label, number, start, end, phase) in enumerate(WEEKS):
         if label in existing:
             continue
         db.add(
@@ -145,6 +146,7 @@ def seed_reviews(db: Session) -> None:
                 end_date=_parse(end),
                 phase=phase,
                 target_hours=0 if phase == "Break" else 6,
+                sort_order=order,
                 done=phase == "Break",
             )
         )
@@ -200,29 +202,6 @@ def seed_days(db: Session, tasks_by_title: dict[str, Task], resources: dict[str,
     db.commit()
 
 
-def repair_seeded_plan_dates(db: Session) -> None:
-    """Restore the canonical calendar for unfinished seeded sessions only."""
-    plans = db.scalars(select(DayPlan).where(DayPlan.done.is_(False))).all()
-    # The earlier buggy compactor put later-week sessions on today's date. Only
-    # repair that unmistakable shape; normal adaptive schedules are untouched.
-    if not plans or not any(plan.day == date.today() and (plan.week or 0) >= 3 for plan in plans):
-        return
-    by_week_title = {(plan.week, plan.title): plan for plan in plans if plan.week is not None}
-    for _label, number, start, _end, _phase in WEEKS:
-        if number is None or number not in WEEK_PLANS:
-            continue
-        rows = list(WEEK_PLANS[number])
-        offset, minutes, mode, title, scope = REVIEW_SESSION
-        rows.append((offset, minutes, mode, f"{title} S{number}", scope, f"Weekly Review S{number}", ""))
-        week_start = date.fromisoformat(start)
-        for slot, (day_offset, _mins, _mode, session_title, *_rest) in enumerate(rows):
-            plan = by_week_title.get((number, session_title))
-            if plan:
-                plan.day = week_start + timedelta(days=day_offset)
-                plan.slot = slot
-    db.flush()
-
-
 def seed_cv(db: Session) -> None:
     if db.scalar(select(CVDocument).limit(1)):
         return
@@ -249,3 +228,100 @@ def run(db: Session) -> None:
     tasks_by_title = {t.title: t for t in db.scalars(select(Task)).unique().all()}
     seed_days(db, tasks_by_title, resources)
     seed_cv(db)
+
+
+# ------------------------------------------------------------------ bootstrap
+
+# Child activities and sharpened scopes for a handful of sessions. One-time
+# enrichment applied only when a fresh database is first seeded.
+_ACTIVITY_SETS: dict[str, list[tuple[str, int, str]]] = {
+    "Exercism · los tres primeros del track": [
+        ("Guido's Gorgeous Lasagna", 25, "https://exercism.org/tracks/python/exercises/lasagna"),
+        ("Ghost Gobble", 25, "https://exercism.org/tracks/python/exercises/ghost-gobble-arcade-game"),
+        ("Currency Exchange", 25, "https://exercism.org/tracks/python/exercises/currency-exchange"),
+    ],
+    "Richards · lecciones 161 y 159": [
+        ("Lección 161 · Agility and Monolithic Architectures", 30, "https://www.developertoarchitect.com/lessons/"),
+        ("Lección 159 · Modular Monolith Architecture", 30, "https://www.developertoarchitect.com/lessons/"),
+    ],
+    "Richards · lección 162 + tu tabla": [
+        ("Lección 162 · Microservices Architecture", 25, "https://www.developertoarchitect.com/lessons/"),
+        ("Tabla de trade-offs: cuándo elegir cada estilo", 20, "https://www.developertoarchitect.com/lessons/"),
+    ],
+    "Richards · lección 131 + los 4 estilos restantes": [
+        ("Lección 131 · Microservices vs Event-Driven", 25, "https://www.developertoarchitect.com/lessons/"),
+        ("Layered, Clean, Hexagonal y Event-Driven", 35, "https://www.developertoarchitect.com/lessons/"),
+    ],
+    "Top-K vs Top-P y KV cache": [
+        ("Medir TTFT e inter-token latency", 20, ""),
+        ("Explicar conceptualmente KV cache", 20, ""),
+        ("Separar observación empírica de causalidad", 20, ""),
+    ],
+    "Quantization y VRAM de tus modelos": [
+        ("Calcular 7B × bits por parámetro", 25, ""),
+        ("Distinguir weights, KV cache y runtime overhead", 25, ""),
+        ("Comparar con memoria observada en Ollama", 25, ""),
+        ("Explicar por qué no coinciden exactamente", 45, ""),
+    ],
+}
+
+_SCOPE_UPDATES: dict[str, str] = {
+    "Top-K vs Top-P y KV cache": "Compara Top-K y Top-P en Ollama. Mide Time To First Token e inter-token latency. Explica conceptualmente cómo KV cache evita recalcular K/V anteriores y separa la observación empírica de la explicación causal.",
+    "Quantization y VRAM de tus modelos": "Distingue model weights, RAM/VRAM residente, KV cache, context length y runtime overhead. Calcula 7B × bits por parámetro y contrástalo con la memoria realmente observada en Ollama; explica por qué no coincide exactamente.",
+    "Richards · lección 131 + los 4 estilos restantes": "Lección 131 · Microservices vs Event-Driven Architecture. Distingue distribución/deployment boundaries (monolith vs microservices) de organización interna y dependencias (layered, clean, hexagonal, event-driven), y resume el trade-off de cada una.",
+}
+
+
+def _enrich_sessions(db: Session) -> None:
+    for title, specs in _ACTIVITY_SETS.items():
+        plan = db.query(DayPlan).filter(DayPlan.title == title).first()
+        if plan and not plan.activities:
+            plan.activities = [
+                DayPlanActivity(title=name, minutes=minutes, url=url, sort_order=index)
+                for index, (name, minutes, url) in enumerate(specs)
+            ]
+    for title, scope in _SCOPE_UPDATES.items():
+        plan = db.query(DayPlan).filter(DayPlan.title == title).first()
+        if plan and not plan.done:
+            plan.scope = scope
+    db.commit()
+
+
+def _backfill_review_sort_order(db: Session) -> None:
+    """Older databases predate `sort_order`; order the weeks by their dates once."""
+    reviews = db.scalars(select(WeeklyReview).order_by(WeeklyReview.start_date, WeeklyReview.id)).all()
+    if any(r.sort_order for r in reviews):
+        return
+    for order, review in enumerate(reviews):
+        review.sort_order = order
+    db.commit()
+
+
+def bootstrap(db: Session) -> None:
+    """Seed the database exactly once, then never touch user edits again.
+
+    - Already bootstrapped -> return immediately.
+    - Pre-existing live database (predates this migration) -> adopt it as-is: only
+      write the default plan settings if missing and backfill week ordering.
+    - Empty database -> full seed, enrich sessions, write defaults and lay the calendar.
+    """
+    from .services import plan_settings, scheduler
+
+    if plan_settings.is_seeded(db):
+        return
+
+    has_rows = (
+        db.scalar(select(Task.id).limit(1)) is not None
+        or db.scalar(select(DayPlan.id).limit(1)) is not None
+    )
+    if has_rows:
+        plan_settings.ensure_defaults(db)
+        _backfill_review_sort_order(db)
+        plan_settings.mark_seeded(db)
+        return
+
+    run(db)
+    _enrich_sessions(db)
+    plan_settings.put_many(db, plan_settings.env_defaults())
+    scheduler.regenerate(db, "full")
+    plan_settings.mark_seeded(db)

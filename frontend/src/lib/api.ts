@@ -234,6 +234,16 @@ export interface Dashboard {
   questions_due: number
 }
 
+export interface PlanSettings {
+  start_date: string
+  core_deadline: string
+  final_deadline: string
+  weekly_target_hours: number
+  rest_weekdays: number[]
+}
+
+export interface RegenerateResult { reviews_updated: number; days_moved: number; tasks_updated: number }
+
 export interface CoachHealth {
   available: boolean
   url: string
@@ -254,13 +264,23 @@ export const api = {
   updateSkill: (id: number, body: Partial<Skill>) => patch<Skill>(`/skills/${id}`, body),
 
   resources: () => get<Resource[]>('/resources'),
-  updateResource: (id: number, body: Partial<Resource>) => patch<Resource>(`/resources/${id}`, body),
+  updateResource: (id: number, body: Record<string, unknown>) => patch<Resource>(`/resources/${id}`, body),
+  createResource: (body: Record<string, unknown>) => post<Resource>('/resources', body),
+  deleteResource: (id: number) => del(`/resources/${id}`),
+  createSkill: (body: Record<string, unknown>) => post<Skill>('/skills', body),
+  deleteSkill: (id: number) => del(`/skills/${id}`),
+
+  planSettings: () => get<PlanSettings>('/settings'),
+  savePlanSettings: (body: Partial<PlanSettings>) => put<PlanSettings>('/settings', body),
+  regeneratePlan: (mode: 'from_today' | 'full') => post<RegenerateResult>('/plan/regenerate', { mode }),
 
   tasks: (q: Record<string, string | number | boolean> = {}) => {
     const qs = new URLSearchParams(Object.entries(q).map(([k, v]) => [k, String(v)])).toString()
     return get<Task[]>(`/tasks${qs ? `?${qs}` : ''}`)
   },
   updateTask: (id: number, body: Record<string, unknown>) => patch<Task>(`/tasks/${id}`, body),
+  createTask: (body: Record<string, unknown>) => post<Task>('/tasks', body),
+  deleteTask: (id: number) => del(`/tasks/${id}`),
   clearFocus: () => post<void>('/tasks/clear-focus'),
   toggleChecklist: (id: number, done: boolean) => patch<ChecklistItem>(`/checklist/${id}?done=${done}`, {}),
 
@@ -268,8 +288,10 @@ export const api = {
     const qs = new URLSearchParams(Object.entries(q).map(([k, v]) => [k, String(v)])).toString()
     return get<DayPlan[]>(`/days${qs ? `?${qs}` : ''}`)
   },
-  updateDay: (id: number, body: { done?: boolean; scope?: string; minutes?: number }) =>
+  updateDay: (id: number, body: Record<string, unknown>) =>
     patch<DayPlan>(`/days/${id}`, body),
+  createDay: (body: Record<string, unknown>) => post<DayPlan>('/days', body),
+  deleteDay: (id: number) => del(`/days/${id}`),
   startDay: (id: number) => post<DayPlan>(`/days/${id}/start`),
   toggleActivity: (planId: number, activityId: number, done: boolean) => patch<DayPlan>(`/days/${planId}/activities/${activityId}?done=${done}`, {}),
   completeDay: (id: number, minutes?: number) =>

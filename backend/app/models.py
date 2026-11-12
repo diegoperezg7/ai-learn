@@ -167,6 +167,7 @@ class WeeklyReview(Base):
     end_date = Column(Date, nullable=True)
     phase = Column(String(40), default="Sprint 12w")
     target_hours = Column(Float, default=6)
+    sort_order = Column(Integer, default=0)
     exercism_done = Column(Integer, default=0)
     interview_qs_passed = Column(Integer, default=0)
     built = Column(Text, default="")
