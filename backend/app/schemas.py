@@ -105,11 +105,19 @@ class ResourceCreate(ResourceBase):
 
 class ResourceUpdate(BaseModel):
     name: str | None = None
+    provider: str | None = None
+    kind: str | None = None
+    url: str | None = None
+    price: str | None = None
+    free_access: bool | None = None
     status: str | None = None
     priority: str | None = None
+    verdict: str | None = None
     notes: str | None = None
     rating: float | None = None
     estimated_hours: float | None = None
+    icon: str | None = None
+    skill_ids: list[int] | None = None
 
 
 class ResourceOut(ResourceBase, ORMModel):
@@ -170,6 +178,9 @@ class TaskCreate(TaskBase):
 class TaskUpdate(BaseModel):
     title: str | None = None
     description: str | None = None
+    category: str | None = None
+    phase: str | None = None
+    week: int | None = None
     status: str | None = None
     priority: str | None = None
     today_focus: bool | None = None
@@ -222,8 +233,34 @@ class DayPlanOut(ORMModel):
 class DayPlanUpdate(BaseModel):
     done: bool | None = None
     started: bool | None = None
+    title: str | None = None
     scope: str | None = None
     minutes: int | None = None
+    week: int | None = None
+    slot: int | None = None
+    mode: str | None = None
+    task_id: int | None = None
+    resource_id: int | None = None
+
+
+class DayPlanActivityIn(BaseModel):
+    title: str
+    minutes: int = 25
+    url: str = ""
+    sort_order: int = 0
+
+
+class DayPlanCreate(BaseModel):
+    day: date
+    week: int | None = None
+    slot: int = 0
+    title: str
+    scope: str = ""
+    minutes: int = 45
+    mode: str = "Practice"
+    task_id: int | None = None
+    resource_id: int | None = None
+    activities: list[DayPlanActivityIn] = Field(default_factory=list)
 
 
 # ---------------------------------------------------------------- sessions
@@ -253,6 +290,11 @@ class SessionOut(ORMModel):
 
 
 class WeeklyReviewUpdate(BaseModel):
+    label: str | None = None
+    start_date: date | None = None
+    end_date: date | None = None
+    target_hours: float | None = None
+    phase: str | None = None
     exercism_done: int | None = None
     interview_qs_passed: int | None = None
     built: str | None = None
@@ -350,6 +392,35 @@ class NotificationOut(ORMModel):
     body: str
     read: bool
     created_at: datetime
+
+
+# ---------------------------------------------------------------- plan settings
+
+
+class PlanSettingsOut(BaseModel):
+    start_date: date
+    core_deadline: date
+    final_deadline: date
+    weekly_target_hours: float
+    rest_weekdays: list[int] = Field(default_factory=list)  # 0=Mon .. 6=Sun
+
+
+class PlanSettingsUpdate(BaseModel):
+    start_date: date | None = None
+    core_deadline: date | None = None
+    final_deadline: date | None = None
+    weekly_target_hours: float | None = None
+    rest_weekdays: list[int] | None = None
+
+
+class RegenerateIn(BaseModel):
+    mode: str = "from_today"  # from_today | full
+
+
+class RegenerateOut(BaseModel):
+    reviews_updated: int
+    days_moved: int
+    tasks_updated: int
 
 
 # ---------------------------------------------------------------- dashboard

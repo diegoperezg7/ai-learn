@@ -9,12 +9,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from ..config import settings
 from ..database import get_db
 from ..models import DayPlan, DayPlanActivity, InterviewQuestion, Notification, Skill, StudySession, Task, WeeklyReview
 from ..schemas import (
     CategoryStat,
     DashboardOut,
+    DayPlanActivityIn,
+    DayPlanCreate,
     DayPlanOut,
     DayPlanUpdate,
     NotificationOut,
@@ -24,33 +25,9 @@ from ..schemas import (
     WeeklyReviewUpdate,
     WeekHours,
 )
-from ..services import notifier, progress
+from ..services import notifier, plan_settings, progress, scheduler
 
 router = APIRouter(tags=["tracking"])
-
-
-def _adaptive_dates(
-    plans: list[DayPlan],
-    reference: date,
-    has_progress_today: bool,
-    break_ranges: list[tuple[date, date]],
-) -> dict[int, date]:
-    """Return effective dates without mutating the canonical roadmap."""
-    pending = sorted((p for p in plans if not p.done), key=lambda p: (p.day, p.slot, p.id))
-    if not pending:
-        return {}
-    cursor = reference if has_progress_today or pending[0].day <= reference else reference + timedelta(days=1)
-
-    def in_break(day: date) -> bool:
-        return any(start <= day <= end for start, end in break_ranges)
-
-    effective: dict[int, date] = {}
-    for plan in pending:
-        while in_break(cursor):
-            cursor += timedelta(days=1)
-        effective[plan.id] = cursor
-        cursor += timedelta(days=1)
-    return effective
 
 
 # ------------------------------------------------------------------ day plan
@@ -74,7 +51,8 @@ def list_days(
         for review in db.scalars(select(WeeklyReview)).all()
         if review.phase == "Break" and review.start_date and review.end_date
     ]
-    effective = _adaptive_dates(plans, reference, has_progress_today, break_ranges)
+    rest = plan_settings.load(db).rest_weekdays
+    effective = scheduler.adaptive_dates(plans, reference, has_progress_today, break_ranges, rest)
     output = [
         DayPlanOut.model_validate(plan).model_copy(update={"day": effective.get(plan.id, plan.day)})
         for plan in plans
@@ -83,6 +61,28 @@ def list_days(
     if day is not None:
         output = [plan for plan in output if plan.day == day]
     return sorted(output, key=lambda plan: (plan.day, plan.slot, plan.id))
+
+
+@router.post("/days", response_model=DayPlanOut, status_code=201)
+def create_day(payload: DayPlanCreate, db: Session = Depends(get_db)) -> DayPlan:
+    plan = DayPlan(**payload.model_dump(exclude={"activities"}))
+    for idx, item in enumerate(payload.activities):
+        plan.activities.append(
+            DayPlanActivity(title=item.title, minutes=item.minutes, url=item.url, sort_order=item.sort_order or idx)
+        )
+    db.add(plan)
+    db.commit()
+    db.refresh(plan)
+    return plan
+
+
+@router.delete("/days/{plan_id}", status_code=204)
+def delete_day(plan_id: int, db: Session = Depends(get_db)) -> None:
+    plan = db.get(DayPlan, plan_id)
+    if not plan:
+        raise HTTPException(404, "Sesion no encontrada")
+    db.delete(plan)
+    db.commit()
 
 
 @router.patch("/days/{plan_id}", response_model=DayPlanOut)
@@ -144,6 +144,33 @@ def toggle_activity(plan_id: int, activity_id: int, done: bool, db: Session = De
     plan.done = bool(plan.activities) and all(a.done for a in plan.activities)
     db.commit(); db.refresh(plan)
     return plan
+
+
+@router.post("/days/{plan_id}/activities", response_model=DayPlanOut, status_code=201)
+def add_activity(plan_id: int, payload: DayPlanActivityIn, db: Session = Depends(get_db)) -> DayPlan:
+    plan = db.get(DayPlan, plan_id)
+    if not plan:
+        raise HTTPException(404, "Sesion no encontrada")
+    plan.activities.append(
+        DayPlanActivity(
+            title=payload.title,
+            minutes=payload.minutes,
+            url=payload.url,
+            sort_order=payload.sort_order or len(plan.activities),
+        )
+    )
+    db.commit()
+    db.refresh(plan)
+    return plan
+
+
+@router.delete("/days/{plan_id}/activities/{activity_id}", status_code=204)
+def delete_activity(plan_id: int, activity_id: int, db: Session = Depends(get_db)) -> None:
+    activity = db.get(DayPlanActivity, activity_id)
+    if not activity or activity.plan_id != plan_id:
+        raise HTTPException(404, "Actividad no encontrada")
+    db.delete(activity)
+    db.commit()
 
 
 # ------------------------------------------------------------------ sessions
@@ -279,6 +306,7 @@ def mark_all_read(db: Session = Depends(get_db)) -> None:
 @router.get("/dashboard", response_model=DashboardOut)
 def dashboard(db: Session = Depends(get_db)) -> DashboardOut:
     ref = progress.today()
+    cfg = plan_settings.load(db)
     tasks = db.scalars(select(Task)).unique().all()
     real_tasks = [t for t in tasks if t.phase != "Break"]
 
@@ -403,7 +431,7 @@ def dashboard(db: Session = Depends(get_db)) -> DashboardOut:
     elif today_pending:
         today_state = "today"
         recommendation = today_pending[0]
-    elif hours_week >= settings.weekly_target_hours:
+    elif hours_week >= cfg.weekly_target_hours:
         today_state = "covered"
         # Keep the baseline at six hours, but offer one voluntary next step so
         # an ahead-of-schedule learner can keep moving without flooding Today.
@@ -415,10 +443,10 @@ def dashboard(db: Session = Depends(get_db)) -> DashboardOut:
 
     return DashboardOut(
         today=ref,
-        sprint_start=settings.sprint_start,
-        core_deadline=settings.core_deadline,
-        final_deadline=settings.final_deadline,
-        days_to_core=(settings.core_deadline - ref).days,
+        sprint_start=cfg.start_date,
+        core_deadline=cfg.core_deadline,
+        final_deadline=cfg.final_deadline,
+        days_to_core=(cfg.core_deadline - ref).days,
         plan_days_remaining=len(pending_plan_days),
         estimated_completion_date=pending_plan_days[-1] if pending_plan_days else ref,
         current_week=current_week,
@@ -430,7 +458,7 @@ def dashboard(db: Session = Depends(get_db)) -> DashboardOut:
         week_tasks_total=len(week_tasks),
         week_tasks_done=len(week_done),
         hours_this_week=hours_week,
-        weekly_target=settings.weekly_target_hours,
+        weekly_target=cfg.weekly_target_hours,
         hours_total=progress.total_hours(db),
         pace_status=pace_status,
         pace_delta_hours=pace_delta,

@@ -10,8 +10,8 @@ from datetime import date, timedelta
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from ..config import settings
 from ..models import DayPlan, InterviewQuestion, Resource, Skill, StudySession, Task, WeeklyReview
+from . import plan_settings
 
 DONE_STATUSES = {"Completed", "Interview Ready"}
 
@@ -154,10 +154,11 @@ def streak_days(db: Session, ref: date | None = None) -> int:
 def pace(db: Session, ref: date | None = None) -> tuple[str, float]:
     """Compare logged hours against the expected linear pace since sprint start."""
     ref = ref or today()
-    if ref < settings.sprint_start:
+    cfg = plan_settings.load(db)
+    if ref < cfg.start_date:
         return "not-started", 0.0
-    elapsed_days = (ref - settings.sprint_start).days + 1
-    expected = (elapsed_days / 7) * settings.weekly_target_hours
+    elapsed_days = (ref - cfg.start_date).days + 1
+    expected = (elapsed_days / 7) * cfg.weekly_target_hours
     actual = total_hours(db)
     delta = round(actual - expected, 1)
     if delta >= 1.5:

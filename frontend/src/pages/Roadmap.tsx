@@ -1,9 +1,10 @@
 import { useMemo, useState } from 'react'
-import { Check, ChevronDown, ChevronRight, Search } from 'lucide-react'
+import { Check, ChevronDown, ChevronRight, Plus, Search } from 'lucide-react'
 
 import { Badge, Card, Empty, ProgressBar, fmtDate, fmtHours } from '../components/ui'
 import { DaySession } from '../components/DaySession'
 import { TaskCard } from '../components/TaskCard'
+import { TaskForm } from '../components/TaskForm'
 import type { Task } from '../lib/api'
 import { useData, usePrefs, useT } from '../store/useStore'
 
@@ -41,6 +42,7 @@ export function Roadmap() {
   const [hideDone, setHideDone] = useState(false)
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
   const [showGoals, setShowGoals] = useState<Record<string, boolean>>({})
+  const [creating, setCreating] = useState(false)
 
   const weekMeta = useMemo(() => {
     const map = new Map<number, { label: string; start: string; end: string; current: boolean }>()
@@ -157,6 +159,9 @@ export function Roadmap() {
         <button className={`btn btn-sm ${hideDone ? 'btn-primary' : ''}`} onClick={() => setHideDone(!hideDone)}>
           <Check size={14} /> {t('rm.hideDone')}
         </button>
+        <button className="btn btn-primary btn-sm" onClick={() => setCreating(true)}>
+          <Plus size={14} /> {t('form.newTask')}
+        </button>
       </div>
 
       {groups.length === 0 ? (
@@ -254,6 +259,8 @@ export function Roadmap() {
           })}
         </div>
       )}
+
+      {creating && <TaskForm onClose={() => setCreating(false)} />}
     </>
   )
 }

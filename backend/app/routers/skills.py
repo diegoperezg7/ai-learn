@@ -144,8 +144,12 @@ def update_resource(resource_id: int, payload: ResourceUpdate, db: Session = Dep
     resource = db.get(Resource, resource_id)
     if not resource:
         raise HTTPException(404, "Recurso no encontrado")
-    for field, value in payload.model_dump(exclude_unset=True).items():
+    data = payload.model_dump(exclude_unset=True)
+    skill_ids = data.pop("skill_ids", None)
+    for field, value in data.items():
         setattr(resource, field, value)
+    if skill_ids is not None:
+        resource.skills = db.scalars(select(Skill).where(Skill.id.in_(skill_ids))).unique().all()
     db.commit()
     db.refresh(resource)
     return resource

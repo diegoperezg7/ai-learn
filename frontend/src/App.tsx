@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { NavLink, Navigate, Route, Routes } from 'react-router-dom'
 import {
   BarChart3, Bell, BookOpen, Brain, CalendarDays, ClipboardList, FileText, GaugeCircle,
-  Home, Languages, LayoutDashboard, ListChecks, Menu, Moon, Rocket, Sun, Target, X,
+  Home, Languages, LayoutDashboard, ListChecks, Menu, Moon, Rocket, Settings as SettingsIcon, Sun, Target, X,
 } from 'lucide-react'
 
 import { Badge, Card, Empty } from './components/ui'
@@ -16,6 +16,7 @@ import { CalendarPage, Timeline } from './pages/Plan'
 import { Resources } from './pages/Resources'
 import { Reviews } from './pages/Reviews'
 import { Roadmap } from './pages/Roadmap'
+import { Settings } from './pages/Settings'
 import { Skills } from './pages/Skills'
 import { useData, usePrefs, useT } from './store/useStore'
 
@@ -27,6 +28,7 @@ const NAV = [
       { to: '/roadmap', icon: ListChecks, label: 'nav.roadmap' },
       { to: '/timeline', icon: GaugeCircle, label: 'nav.timeline' },
       { to: '/calendar', icon: CalendarDays, label: 'nav.calendar' },
+      { to: '/settings', icon: SettingsIcon, label: 'nav.settings' },
     ],
   },
   {
@@ -191,6 +193,7 @@ export default function App() {
               <Route path="/roadmap" element={<Roadmap />} />
               <Route path="/timeline" element={<Timeline />} />
               <Route path="/calendar" element={<CalendarPage />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="/progress" element={<ProgressPage />} />
               <Route path="/skills" element={<Skills />} />
               <Route path="/resources" element={<Resources />} />

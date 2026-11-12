@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 
 import { api } from '../lib/api'
 import type {
-  AppNotification, CVSuggestion, Dashboard, DayPlan, Question, Resource, Skill, StudySession, Task, WeeklyReview,
+  AppNotification, CVSuggestion, Dashboard, DayPlan, PlanSettings, Question, Resource, Skill, StudySession, Task, WeeklyReview,
 } from '../lib/api'
 import { translate } from '../i18n'
 import type { Lang, TKey } from '../i18n'
@@ -56,10 +56,20 @@ interface DataState {
   notifications: AppNotification[]
   suggestions: CVSuggestion[]
   days: DayPlan[]
+  settings: PlanSettings | null
   toasts: Toast[]
 
   loadAll: () => Promise<void>
   refreshDashboard: () => Promise<void>
+  saveSettings: (body: Partial<PlanSettings>) => Promise<void>
+  regeneratePlan: (mode: 'from_today' | 'full') => Promise<void>
+  createResource: (body: Record<string, unknown>) => Promise<Resource>
+  removeResource: (id: number) => Promise<void>
+  createSkill: (body: Record<string, unknown>) => Promise<Skill>
+  removeSkill: (id: number) => Promise<void>
+  createTask: (body: Record<string, unknown>) => Promise<Task>
+  patchTask: (id: number, body: Record<string, unknown>) => Promise<void>
+  removeTask: (id: number) => Promise<void>
   toast: (message: string, kind?: Toast['kind']) => void
   dismissToast: (id: number) => void
 
@@ -71,7 +81,7 @@ interface DataState {
   toggleChecklist: (taskId: number, itemId: number, done: boolean) => Promise<void>
   logSession: (body: { minutes: number; task_id?: number | null; mode?: string; used_ai?: boolean; notes?: string }) => Promise<void>
   patchSkill: (id: number, body: Partial<Skill>) => Promise<void>
-  patchResource: (id: number, body: Partial<Resource>) => Promise<void>
+  patchResource: (id: number, body: Record<string, unknown>) => Promise<void>
   patchQuestion: (id: number, body: Partial<Question>) => Promise<void>
   patchReview: (id: number, body: Partial<WeeklyReview>) => Promise<void>
   loadSuggestions: () => Promise<void>
@@ -97,6 +107,7 @@ export const useData = create<DataState>()((set, get) => ({
   notifications: [],
   suggestions: [],
   days: [],
+  settings: null,
   toasts: [],
 
   toast: (message, kind = 'info') => {
@@ -110,11 +121,11 @@ export const useData = create<DataState>()((set, get) => ({
     set({ loading: true, error: null })
     try {
       await api.refreshNotifications().catch(() => undefined)
-      const [dashboard, tasks, skills, resources, questions, reviews, sessions, notifications, days] = await Promise.all([
+      const [dashboard, tasks, skills, resources, questions, reviews, sessions, notifications, days, settings] = await Promise.all([
         api.dashboard(), api.tasks(), api.skills(), api.resources(),
-        api.questions(), api.reviews(), api.sessions(), api.notifications(), api.days(),
+        api.questions(), api.reviews(), api.sessions(), api.notifications(), api.days(), api.planSettings(),
       ])
-      set({ dashboard, tasks, skills, resources, questions, reviews, sessions, notifications, days, loaded: true })
+      set({ dashboard, tasks, skills, resources, questions, reviews, sessions, notifications, days, settings, loaded: true })
     } catch (e) {
       set({ error: e instanceof Error ? e.message : tr('common.loadError') })
     } finally {
@@ -129,6 +140,65 @@ export const useData = create<DataState>()((set, get) => ({
     } catch {
       /* keep previous snapshot */
     }
+  },
+
+  saveSettings: async (body) => {
+    const settings = await api.savePlanSettings(body)
+    set({ settings })
+    get().toast(tr('toast.settingsSaved'), 'success')
+  },
+
+  regeneratePlan: async (mode) => {
+    const result = await api.regeneratePlan(mode)
+    await get().loadAll()
+    get().toast(tr('toast.planRegenerated', { n: result.days_moved }), 'success')
+  },
+
+  createResource: async (body) => {
+    const resource = await api.createResource(body)
+    set({ resources: [...get().resources, resource] })
+    get().toast(tr('toast.resourceCreated'), 'success')
+    return resource
+  },
+
+  removeResource: async (id) => {
+    await api.deleteResource(id)
+    set({ resources: get().resources.filter((r) => r.id !== id) })
+    get().toast(tr('toast.resourceDeleted'), 'success')
+  },
+
+  createSkill: async (body) => {
+    const skill = await api.createSkill(body)
+    set({ skills: [...get().skills, skill] })
+    get().toast(tr('toast.skillCreated'), 'success')
+    return skill
+  },
+
+  removeSkill: async (id) => {
+    await api.deleteSkill(id)
+    set({ skills: get().skills.filter((s) => s.id !== id) })
+    get().toast(tr('toast.skillDeleted'), 'success')
+  },
+
+  createTask: async (body) => {
+    const task = await api.createTask(body)
+    set({ tasks: [...get().tasks, task] })
+    await get().refreshDashboard()
+    get().toast(tr('toast.taskCreated'), 'success')
+    return task
+  },
+
+  patchTask: async (id, body) => {
+    const updated = await api.updateTask(id, body)
+    set({ tasks: get().tasks.map((t) => (t.id === id ? updated : t)) })
+    await get().refreshDashboard()
+  },
+
+  removeTask: async (id) => {
+    await api.deleteTask(id)
+    set({ tasks: get().tasks.filter((t) => t.id !== id) })
+    await get().refreshDashboard()
+    get().toast(tr('toast.taskDeleted'), 'success')
   },
 
   completeDayPlan: async (plan) => {

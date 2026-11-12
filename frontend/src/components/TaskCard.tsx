@@ -1,24 +1,27 @@
 import { useState } from 'react'
-import { Clock, Flame, Package, ChevronDown, ChevronRight } from 'lucide-react'
+import { Clock, Flame, Package, Pencil, Trash2, ChevronDown, ChevronRight } from 'lucide-react'
 
 import type { Task } from '../lib/api'
 import { Logo } from '../lib/logos'
 import { usePrefs, useData, useT } from '../store/useStore'
 import { Badge, Checkbox, CATEGORY_COLOR, PRIORITY_TONE, fmtDate, fmtHours } from './ui'
+import { TaskForm } from './TaskForm'
 
 const DONE = new Set(['Completed', 'Interview Ready'])
 
 export function TaskCard({ task, showDates = true }: { task: Task; showDates?: boolean }) {
   const [open, setOpen] = useState(false)
+  const [editing, setEditing] = useState(false)
   const t = useT()
   const lang = usePrefs((s) => s.lang)
   const theme = usePrefs((s) => s.theme)
-  const { setTaskStatus, toggleFocus, toggleChecklist } = useData()
+  const { setTaskStatus, toggleFocus, toggleChecklist, removeTask } = useData()
 
   const done = DONE.has(task.status)
   const checkDone = task.checklist.filter((c) => c.done).length
 
   return (
+    <>
     <div className={`task ${done ? 'done' : ''} ${task.today_focus ? 'focus' : ''}`}>
       <Checkbox
         checked={done}
@@ -36,6 +39,16 @@ export function TaskCard({ task, showDates = true }: { task: Task; showDates?: b
             style={{ color: task.today_focus ? 'var(--accent)' : 'var(--text-dim)' }}
           >
             <Flame size={15} fill={task.today_focus ? 'currentColor' : 'none'} />
+          </button>
+          <button className="btn btn-ghost btn-icon" title={t('form.edit')} onClick={() => setEditing(true)}>
+            <Pencil size={14} />
+          </button>
+          <button
+            className="btn btn-ghost btn-icon"
+            title={t('form.delete')}
+            onClick={() => { if (confirm(t('form.confirmDelete', { name: task.title }))) removeTask(task.id) }}
+          >
+            <Trash2 size={14} />
           </button>
         </div>
 
@@ -98,5 +111,7 @@ export function TaskCard({ task, showDates = true }: { task: Task; showDates?: b
         )}
       </div>
     </div>
+    {editing && <TaskForm initial={task} onClose={() => setEditing(false)} />}
+    </>
   )
 }

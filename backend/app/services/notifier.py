@@ -7,9 +7,8 @@ from datetime import date, timedelta
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from ..config import settings
 from ..models import Notification, StudySession, Task
-from . import progress
+from . import plan_settings, progress
 
 
 def _push(db: Session, key: str, level: str, title: str, body: str) -> bool:
@@ -71,7 +70,7 @@ def refresh(db: Session, ref: date | None = None) -> int:
         )
 
     # 4. No focus picked for today
-    if ref >= settings.sprint_start:
+    if ref >= plan_settings.load(db).start_date:
         focused = db.scalar(select(Task.id).where(Task.today_focus.is_(True)).limit(1))
         if not focused:
             created += _push(

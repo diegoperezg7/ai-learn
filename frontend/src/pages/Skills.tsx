@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Award, Save } from 'lucide-react'
+import { Award, Plus, Save, Trash2 } from 'lucide-react'
 
 import { Badge, CATEGORY_COLOR, Card, Empty, Modal, PRIORITY_TONE, ProgressBar, STATUS_TONE, fmtHours } from '../components/ui'
 import { Logo } from '../lib/logos'
@@ -8,6 +8,93 @@ import { useData, usePrefs, useT } from '../store/useStore'
 
 const STATUSES = ['Not Started', 'Learning', 'Practicing', 'Interview Ready', 'Completed']
 const CATEGORIES = ['AI Engineering', 'Software Engineering', 'Cloud / Infra', 'Models / ML']
+const PRIORITIES = ['Critical', 'High', 'Medium', 'Optional']
+
+function slugify(name: string): string {
+  return name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+}
+
+function SkillCreateModal({ onClose }: { onClose: () => void }) {
+  const t = useT()
+  const { createSkill } = useData()
+  const [name, setName] = useState('')
+  const [slug, setSlug] = useState('')
+  const [slugTouched, setSlugTouched] = useState(false)
+  const [category, setCategory] = useState('Software Engineering')
+  const [priority, setPriority] = useState('Medium')
+  const [description, setDescription] = useState('')
+  const [why, setWhy] = useState('')
+  const [criteria, setCriteria] = useState('')
+  const [busy, setBusy] = useState(false)
+
+  const effectiveSlug = slugTouched ? slug : slugify(name)
+
+  const save = async () => {
+    if (!name.trim() || !effectiveSlug) return
+    setBusy(true)
+    try {
+      await createSkill({
+        slug: effectiveSlug, name, category, priority,
+        description, why_it_matters: why, completion_criteria: criteria,
+        current_level: 0, target_level: 5, status: 'Not Started', icon: 'lu:sparkles', color: '#22d3ee',
+      })
+      onClose()
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <Modal
+      title={t('form.newSkill')}
+      onClose={onClose}
+      footer={
+        <>
+          <button className="btn btn-ghost" onClick={onClose}>{t('common.cancel')}</button>
+          <button className="btn btn-primary" onClick={save} disabled={busy || !name.trim()}>{t('common.save')}</button>
+        </>
+      }
+    >
+      <div className="col" style={{ gap: 12 }}>
+        <label className="col" style={{ gap: 5 }}>
+          <span className="small muted">{t('form.title')}</span>
+          <input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
+        </label>
+        <label className="col" style={{ gap: 5 }}>
+          <span className="small muted">{t('form.slug')}</span>
+          <input value={effectiveSlug} onChange={(e) => { setSlug(e.target.value); setSlugTouched(true) }} />
+        </label>
+        <div className="row wrap" style={{ gap: 12 }}>
+          <label className="col" style={{ gap: 5 }}>
+            <span className="small muted">{t('form.category')}</span>
+            <select value={category} onChange={(e) => setCategory(e.target.value)}>
+              {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
+            </select>
+          </label>
+          <label className="col" style={{ gap: 5 }}>
+            <span className="small muted">{t('form.priority')}</span>
+            <select value={priority} onChange={(e) => setPriority(e.target.value)}>
+              {PRIORITIES.map((p) => <option key={p}>{p}</option>)}
+            </select>
+          </label>
+        </div>
+        <label className="col" style={{ gap: 5 }}>
+          <span className="small muted">{t('form.description')}</span>
+          <textarea rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
+        </label>
+        <label className="col" style={{ gap: 5 }}>
+          <span className="small muted">{t('skills.why')}</span>
+          <textarea rows={2} value={why} onChange={(e) => setWhy(e.target.value)} />
+        </label>
+        <label className="col" style={{ gap: 5 }}>
+          <span className="small muted">{t('skills.criteria')}</span>
+          <textarea rows={2} value={criteria} onChange={(e) => setCriteria(e.target.value)} />
+        </label>
+      </div>
+    </Modal>
+  )
+}
 
 function LevelBar({ current, target }: { current: number; target: number }) {
   return (
@@ -21,7 +108,7 @@ function LevelBar({ current, target }: { current: number; target: number }) {
 function SkillModal({ skill, onClose }: { skill: Skill; onClose: () => void }) {
   const t = useT()
   const theme = usePrefs((s) => s.theme)
-  const { patchSkill } = useData()
+  const { patchSkill, removeSkill } = useData()
   const [level, setLevel] = useState(skill.current_level)
   const [status, setStatus] = useState(skill.status)
   const [evidence, setEvidence] = useState(skill.practice_evidence)
@@ -48,6 +135,13 @@ function SkillModal({ skill, onClose }: { skill: Skill; onClose: () => void }) {
       onClose={onClose}
       footer={
         <>
+          <button
+            className="btn btn-ghost"
+            style={{ color: 'var(--danger)', marginRight: 'auto' }}
+            onClick={() => { if (confirm(t('form.confirmDelete', { name: skill.name }))) { removeSkill(skill.id); onClose() } }}
+          >
+            <Trash2 size={14} />{t('form.delete')}
+          </button>
           <button className="btn" onClick={onClose}>{t('common.cancel')}</button>
           <button className="btn btn-primary" onClick={save} disabled={busy}><Save size={14} />{t('common.save')}</button>
         </>
@@ -125,6 +219,7 @@ export function Skills() {
   const { skills } = useData()
   const [cat, setCat] = useState('all')
   const [selected, setSelected] = useState<Skill | null>(null)
+  const [creating, setCreating] = useState(false)
 
   const groups = useMemo(() => {
     const list = cat === 'all' ? skills : skills.filter((s) => s.category === cat)
@@ -156,6 +251,9 @@ export function Skills() {
             <option value="all">{t('common.all')}</option>
             {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
+          <button className="btn btn-primary btn-sm" onClick={() => setCreating(true)}>
+            <Plus size={14} /> {t('form.newSkill')}
+          </button>
         </div>
       </Card>
 
@@ -202,6 +300,7 @@ export function Skills() {
       )}
 
       {selected && <SkillModal skill={selected} onClose={() => setSelected(null)} />}
+      {creating && <SkillCreateModal onClose={() => setCreating(false)} />}
     </>
   )
 }
