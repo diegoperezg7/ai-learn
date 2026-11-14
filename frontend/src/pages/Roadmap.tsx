@@ -85,7 +85,7 @@ export function Roadmap() {
           // "S3 — Advanced Retrieval" -> title "Semana 3", subtitle "Advanced Retrieval"
           title: week != null ? `${t('common.week')} ${week}` : (task.phase === 'Opcional' ? t('rm.optional') : task.phase),
           subtitle: meta?.label.split('—')[1]?.trim() ?? '',
-          order: week ?? 900,
+          order: week != null ? week : (task.phase === 'Opcional' ? -1 : 900),
           tasks: [],
         })
       }
