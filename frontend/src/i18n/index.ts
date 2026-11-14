@@ -193,7 +193,7 @@ const dict = {
     'dash.afterToday': 'Después de hoy, sigue esto:',
     'dash.moreCharts': 'Más gráficos',
 
-    'rm.summary': '{done} de {total} tareas del sprint completadas · en orden, semana a semana.',
+    'rm.summary': '{done} de {total} tareas del plan completadas · en orden, semana a semana.',
     'rm.priorityToday': 'Pendiente prioritaria para hoy',
     'rm.plannedFor': 'Planificada para {day} · {min} min. La fecha original se mantiene en el calendario.',
     'rm.tab.sprint': 'Sprint (S1–S12)',
@@ -537,7 +537,7 @@ const dict = {
     'dash.afterToday': 'After today, next up:',
     'dash.moreCharts': 'More charts',
 
-    'rm.summary': '{done} of {total} sprint tasks done · week by week.',
+    'rm.summary': '{done} of {total} plan tasks done · week by week.',
     'rm.priorityToday': 'Priority item for today',
     'rm.plannedFor': 'Scheduled for {day} · {min} min. The original date stays on the calendar.',
     'rm.tab.sprint': 'Sprint (S1–S12)',

@@ -8,11 +8,6 @@ import { TaskForm } from '../components/TaskForm'
 import type { Task } from '../lib/api'
 import { useData, usePrefs, useT } from '../store/useStore'
 
-/** Phases that collapse into the single "Extra" tab (side tracks / backlog). */
-const EXTRA_PHASES = ['Optional / Filler', 'Consolidation', 'Break', 'Deferred / Personal']
-/** Preferred left-to-right order for the main phase tabs; unlisted phases go last. */
-const PHASE_ORDER = ['Sprint 12w', 'Professional Certifications', 'Models & Advanced AI']
-
 const DONE = new Set(['Completed', 'Interview Ready'])
 
 /** "jueves, 20 ago" -> "Jueves, 20 ago". Solo la primera letra, no cada palabra. */
@@ -35,48 +30,11 @@ export function Roadmap() {
   const t = useT()
   const lang = usePrefs((s) => s.lang)
   const { tasks, reviews, days } = useData()
-  const [tabState, setTab] = useState<string | null>(null)
   const [q, setQ] = useState('')
   const [hideDone, setHideDone] = useState(false)
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
   const [showGoals, setShowGoals] = useState<Record<string, boolean>>({})
   const [creating, setCreating] = useState(false)
-
-  // Tabs are derived from the phases actually present, so content is never
-  // orphaned when the plan changes. They open on the first phase with pending work.
-  const tabDefs = useMemo(() => {
-    const present = Array.from(new Set(tasks.map((x) => x.phase)))
-    const label = (p: string) =>
-      p === 'Sprint 12w' ? t('rm.tab.sprint')
-        : p === 'Professional Certifications' ? t('rm.tab.certs')
-          : p === 'Models & Advanced AI' ? t('rm.tab.december')
-            : p
-    const defs = present
-      .filter((p) => !EXTRA_PHASES.includes(p))
-      .sort((a, b) => {
-        const ia = PHASE_ORDER.indexOf(a), ib = PHASE_ORDER.indexOf(b)
-        return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib)
-      })
-      .map((p) => ({ key: p, label: label(p) }))
-    if (present.some((p) => EXTRA_PHASES.includes(p))) defs.push({ key: 'extra', label: t('rm.tab.extra') })
-    return defs
-  }, [tasks, t])
-
-  const pendingByKey = useMemo(() => {
-    const m: Record<string, number> = {}
-    tasks.forEach((x) => {
-      if (DONE.has(x.status)) return
-      const key = EXTRA_PHASES.includes(x.phase) ? 'extra' : x.phase
-      m[key] = (m[key] ?? 0) + 1
-    })
-    return m
-  }, [tasks])
-
-  const tab =
-    (tabState && tabDefs.some((d) => d.key === tabState) ? tabState : null)
-    ?? tabDefs.find((d) => (pendingByKey[d.key] ?? 0) > 0)?.key
-    ?? tabDefs[0]?.key
-    ?? 'Sprint 12w'
 
   const weekMeta = useMemo(() => {
     const map = new Map<number, { label: string; start: string; end: string; current: boolean }>()
@@ -95,11 +53,10 @@ export function Roadmap() {
 
   const groups = useMemo<Group[]>(() => {
     const needle = q.trim().toLowerCase()
-    const inTab = tasks.filter((x) =>
-      tab === 'extra' ? EXTRA_PHASES.includes(x.phase) : x.phase === tab,
-    )
+    // One single view: the prepared plan is everything assigned to a week, in order.
+    const planTasks = tasks.filter((x) => x.week != null)
 
-    const filtered = inTab.filter((x) => {
+    const filtered = planTasks.filter((x) => {
       if (hideDone && DONE.has(x.status)) return false
       if (needle) {
         const sessionText = days
@@ -138,10 +95,10 @@ export function Roadmap() {
     return [...map.values()]
       .map((g) => ({ ...g, tasks: g.tasks.sort((a, b) => a.sort_order - b.sort_order) }))
       .sort((a, b) => a.order - b.order)
-  }, [tasks, days, tab, q, hideDone, weekMeta, t])
+  }, [tasks, days, q, hideDone, weekMeta, t])
 
-  const sprintTasks = tasks.filter((x) => x.phase === 'Sprint 12w')
-  const sprintDone = sprintTasks.filter((x) => DONE.has(x.status)).length
+  const planTasks = tasks.filter((x) => x.week != null)
+  const planDone = planTasks.filter((x) => DONE.has(x.status)).length
   const today = new Date().toISOString().slice(0, 10)
   const overduePlan = useMemo(
     () => days
@@ -154,11 +111,11 @@ export function Roadmap() {
     <>
       <div className="page-head">
         <h2>{t('nav.roadmap')}</h2>
-        <p>{t('rm.summary', { done: sprintDone, total: sprintTasks.length })}</p>
+        <p>{t('rm.summary', { done: planDone, total: planTasks.length })}</p>
       </div>
 
       <Card style={{ marginBottom: 14 }}>
-        <ProgressBar value={sprintTasks.length ? (sprintDone / sprintTasks.length) * 100 : 0} />
+        <ProgressBar value={planTasks.length ? (planDone / planTasks.length) * 100 : 0} />
       </Card>
 
       {overduePlan && (
@@ -175,14 +132,6 @@ export function Roadmap() {
           </div>
         </Card>
       )}
-
-      <div className="tabs">
-        {tabDefs.map((x) => (
-          <button key={x.key} className={`tab ${tab === x.key ? 'active' : ''}`} onClick={() => setTab(x.key)}>
-            {x.label}
-          </button>
-        ))}
-      </div>
 
       <div className="row wrap" style={{ gap: 8, marginBottom: 14 }}>
         <div className="row" style={{ flex: 1, minWidth: 180, position: 'relative' }}>
