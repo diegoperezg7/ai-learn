@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { CalendarClock, RefreshCw, Save } from 'lucide-react'
+import { BookMarked, CalendarClock, RefreshCw, Save } from 'lucide-react'
 
 import { Card, CardHead, Modal } from '../components/ui'
 import type { TKey } from '../i18n'
@@ -9,7 +9,7 @@ const WEEKDAYS = [0, 1, 2, 3, 4, 5, 6] as const
 
 export function Settings() {
   const t = useT()
-  const { settings, saveSettings, regeneratePlan } = useData()
+  const { settings, saveSettings, regeneratePlan, syncVault } = useData()
 
   const [startDate, setStartDate] = useState('')
   const [weeklyHours, setWeeklyHours] = useState(6)
@@ -19,6 +19,7 @@ export function Settings() {
   const [saving, setSaving] = useState(false)
   const [confirmFull, setConfirmFull] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [syncing, setSyncing] = useState(false)
 
   useEffect(() => {
     if (!settings) return
@@ -144,6 +145,40 @@ export function Settings() {
             </div>
             <button className="btn btn-ghost" onClick={() => setConfirmFull(true)} disabled={busy}>
               {t('settings.apply')}
+            </button>
+          </div>
+        </div>
+      </Card>
+
+      <Card style={{ marginTop: 14 }}>
+        <CardHead title={t('settings.vault')} icon={<BookMarked size={16} />} />
+        <p className="small muted" style={{ marginTop: 0 }}>{t('settings.vaultHint')}</p>
+        <div className="col" style={{ gap: 12, maxWidth: 520 }}>
+          <div className="row between wrap" style={{ gap: 10 }}>
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <strong className="small">{t('settings.vaultAuto')}</strong>
+              <div className="small dim">{t('settings.vaultAutoHint')}</div>
+            </div>
+            <button
+              type="button"
+              className={`btn btn-sm ${settings.vault_autosync ? 'btn-primary' : 'btn-ghost'}`}
+              aria-pressed={settings.vault_autosync}
+              onClick={() => saveSettings({ vault_autosync: !settings.vault_autosync })}
+            >
+              {settings.vault_autosync ? t('settings.vaultOn') : t('settings.vaultOff')}
+            </button>
+          </div>
+          <div className="row between wrap" style={{ gap: 10, borderTop: '1px solid var(--border)', paddingTop: 12 }}>
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <strong className="small">{t('settings.vaultSyncNow')}</strong>
+              <div className="small dim">{t('settings.vaultSyncNowHint')}</div>
+            </div>
+            <button
+              className="btn btn-primary"
+              disabled={syncing}
+              onClick={async () => { setSyncing(true); try { await syncVault() } finally { setSyncing(false) } }}
+            >
+              <RefreshCw size={15} /> {t('settings.vaultSyncBtn')}
             </button>
           </div>
         </div>

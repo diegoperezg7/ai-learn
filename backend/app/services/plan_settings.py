@@ -24,6 +24,7 @@ WEEKLY_HOURS = "plan.weekly_target_hours"
 REST_WEEKDAYS = "plan.rest_weekdays"  # CSV of ints, 0=Mon .. 6=Sun
 CORE_DEADLINE = "plan.core_deadline"
 FINAL_DEADLINE = "plan.final_deadline"
+VAULT_AUTOSYNC = "plan.vault_autosync"  # "true"/"false": mirror the plan to the Obsidian vault
 SEEDED = "seeded"
 
 
@@ -85,6 +86,7 @@ def env_defaults() -> dict[str, str]:
         # Default rest day: Sunday. The old schedule used a mid-week free day, but
         # once the calendar is driven from real weekdays, Sunday is the natural default.
         REST_WEEKDAYS: "6",
+        VAULT_AUTOSYNC: "true",
     }
 
 

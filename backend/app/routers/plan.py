@@ -6,8 +6,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..schemas import PlanSettingsOut, PlanSettingsUpdate, RegenerateIn, RegenerateOut
-from ..services import notifier, plan_settings, scheduler
+from ..schemas import PlanSettingsOut, PlanSettingsUpdate, RegenerateIn, RegenerateOut, VaultSyncOut
+from ..services import notifier, plan_settings, scheduler, vault_sync
 
 router = APIRouter(tags=["plan"])
 
@@ -20,6 +20,7 @@ def _out(db: Session) -> PlanSettingsOut:
         final_deadline=cfg.final_deadline,
         weekly_target_hours=cfg.weekly_target_hours,
         rest_weekdays=sorted(cfg.rest_weekdays),
+        vault_autosync=plan_settings.get(db, plan_settings.VAULT_AUTOSYNC, "true") == "true",
     )
 
 
@@ -51,10 +52,18 @@ def update_settings(payload: PlanSettingsUpdate, db: Session = Depends(get_db)) 
         if len(days) >= 7:
             raise HTTPException(400, "No puedes marcar los 7 dias como descanso")
         updates[plan_settings.REST_WEEKDAYS] = ",".join(str(d) for d in days)
+    if "vault_autosync" in data and data["vault_autosync"] is not None:
+        updates[plan_settings.VAULT_AUTOSYNC] = "true" if data["vault_autosync"] else "false"
 
     if updates:
         plan_settings.put_many(db, updates)
     return _out(db)
+
+
+@router.post("/vault/sync", response_model=VaultSyncOut)
+def sync_vault(db: Session = Depends(get_db)) -> VaultSyncOut:
+    result = vault_sync.sync_all(db)
+    return VaultSyncOut(**result)
 
 
 @router.post("/plan/regenerate", response_model=RegenerateOut)

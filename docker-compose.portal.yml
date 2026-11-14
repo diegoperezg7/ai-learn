@@ -15,6 +15,11 @@ services:
       COACH_ENABLED: "true"
       OLLAMA_URL: http://host.docker.internal:11434
       OLLAMA_MODEL: gemma4:e2b
+      # Mirror the plan into the Obsidian vault (bind-mounted below). Unset => no-op.
+      VAULT_PATH: /vault
+    volumes:
+      # The "Darce" Obsidian vault on the host; it git-auto-syncs on its own.
+      - ${VAULT_HOST_PATH:-/Users/darce/Obsidian/Darce}:/vault
 
   hub-web:
     networks: [hub, edge-hub]

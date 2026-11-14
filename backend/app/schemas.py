@@ -403,6 +403,7 @@ class PlanSettingsOut(BaseModel):
     final_deadline: date
     weekly_target_hours: float
     rest_weekdays: list[int] = Field(default_factory=list)  # 0=Mon .. 6=Sun
+    vault_autosync: bool = True
 
 
 class PlanSettingsUpdate(BaseModel):
@@ -411,6 +412,13 @@ class PlanSettingsUpdate(BaseModel):
     final_deadline: date | None = None
     weekly_target_hours: float | None = None
     rest_weekdays: list[int] | None = None
+    vault_autosync: bool | None = None
+
+
+class VaultSyncOut(BaseModel):
+    enabled: bool
+    written: int
+    path: str | None = None
 
 
 class RegenerateIn(BaseModel):

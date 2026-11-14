@@ -63,6 +63,7 @@ interface DataState {
   refreshDashboard: () => Promise<void>
   saveSettings: (body: Partial<PlanSettings>) => Promise<void>
   regeneratePlan: (mode: 'from_today' | 'full') => Promise<void>
+  syncVault: () => Promise<void>
   createResource: (body: Record<string, unknown>) => Promise<Resource>
   removeResource: (id: number) => Promise<void>
   createSkill: (body: Record<string, unknown>) => Promise<Skill>
@@ -152,6 +153,15 @@ export const useData = create<DataState>()((set, get) => ({
     const result = await api.regeneratePlan(mode)
     await get().loadAll()
     get().toast(tr('toast.planRegenerated', { n: result.days_moved }), 'success')
+  },
+
+  syncVault: async () => {
+    const r = await api.syncVault()
+    if (!r.enabled) {
+      get().toast(tr('toast.vaultDisabled'), 'danger')
+      return
+    }
+    get().toast(tr('toast.vaultSynced', { n: r.written }), 'success')
   },
 
   createResource: async (body) => {

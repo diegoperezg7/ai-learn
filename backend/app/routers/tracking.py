@@ -25,7 +25,7 @@ from ..schemas import (
     WeeklyReviewUpdate,
     WeekHours,
 )
-from ..services import notifier, plan_settings, progress, scheduler
+from ..services import notifier, plan_settings, progress, scheduler, vault_sync
 
 router = APIRouter(tags=["tracking"])
 
@@ -116,6 +116,7 @@ def complete_day(plan_id: int, minutes: int | None = None, db: Session = Depends
         )
         db.commit()
         db.refresh(plan)
+        vault_sync.autosync(db)
     return plan
 
 
@@ -204,6 +205,7 @@ def create_session(payload: SessionCreate, db: Session = Depends(get_db)) -> Ses
     db.add(session)
     db.commit()
     db.refresh(session)
+    vault_sync.autosync(db)
     result = SessionOut.model_validate(session)
     result.task_title = session.task.title if session.task else None
     return result
@@ -263,6 +265,7 @@ def update_review(review_id: int, payload: WeeklyReviewUpdate, db: Session = Dep
         setattr(review, field, value)
     db.commit()
     db.refresh(review)
+    vault_sync.autosync(db)
     return _review_out(review, db, progress.today())
 
 

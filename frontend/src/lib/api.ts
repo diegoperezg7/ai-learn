@@ -240,9 +240,12 @@ export interface PlanSettings {
   final_deadline: string
   weekly_target_hours: number
   rest_weekdays: number[]
+  vault_autosync: boolean
 }
 
 export interface RegenerateResult { reviews_updated: number; days_moved: number; tasks_updated: number }
+
+export interface VaultSyncResult { enabled: boolean; written: number; path: string | null }
 
 export interface CoachHealth {
   available: boolean
@@ -273,6 +276,7 @@ export const api = {
   planSettings: () => get<PlanSettings>('/settings'),
   savePlanSettings: (body: Partial<PlanSettings>) => put<PlanSettings>('/settings', body),
   regeneratePlan: (mode: 'from_today' | 'full') => post<RegenerateResult>('/plan/regenerate', { mode }),
+  syncVault: () => post<VaultSyncResult>('/vault/sync', {}),
 
   tasks: (q: Record<string, string | number | boolean> = {}) => {
     const qs = new URLSearchParams(Object.entries(q).map(([k, v]) => [k, String(v)])).toString()
