@@ -31,7 +31,7 @@ export function Roadmap() {
   const lang = usePrefs((s) => s.lang)
   const { tasks, reviews, days } = useData()
   const [q, setQ] = useState('')
-  const [hideDone, setHideDone] = useState(false)
+  const [hideDone, setHideDone] = useState(true)
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
   const [showGoals, setShowGoals] = useState<Record<string, boolean>>({})
   const [creating, setCreating] = useState(false)
