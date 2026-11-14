@@ -53,8 +53,8 @@ export function Roadmap() {
 
   const groups = useMemo<Group[]>(() => {
     const needle = q.trim().toLowerCase()
-    // One single view: the prepared plan is everything assigned to a week, in order.
-    const planTasks = tasks.filter((x) => x.week != null)
+    // The dated weekly plan, plus the undated "Opcional" self-paced track at the end.
+    const planTasks = tasks.filter((x) => x.week != null || x.phase === 'Opcional')
 
     const filtered = planTasks.filter((x) => {
       if (hideDone && DONE.has(x.status)) return false
@@ -83,7 +83,7 @@ export function Roadmap() {
         map.set(key, {
           key,
           // "S3 — Advanced Retrieval" -> title "Semana 3", subtitle "Advanced Retrieval"
-          title: week != null ? `${t('common.week')} ${week}` : task.phase,
+          title: week != null ? `${t('common.week')} ${week}` : (task.phase === 'Opcional' ? t('rm.optional') : task.phase),
           subtitle: meta?.label.split('—')[1]?.trim() ?? '',
           order: week ?? 900,
           tasks: [],
@@ -97,7 +97,7 @@ export function Roadmap() {
       .sort((a, b) => a.order - b.order)
   }, [tasks, days, q, hideDone, weekMeta, t])
 
-  const planTasks = tasks.filter((x) => x.week != null)
+  const planTasks = tasks.filter((x) => x.week != null || x.phase === 'Opcional')
   const planDone = planTasks.filter((x) => DONE.has(x.status)).length
   const today = new Date().toISOString().slice(0, 10)
   const overduePlan = useMemo(
